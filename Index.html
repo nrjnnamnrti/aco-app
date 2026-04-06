@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ACO</title>
+    
+    <!-- PWA Setup -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        indigo: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
+                        slate: { 50: '#f8fafc', 100: '#f1f5f9', 800: '#1e293b', 900: '#0f172a' }
+                    },
+                    fontSize: {
+                        'xs': '10px',
+                        'sm': '11px',
+                        'base': '12px',
+                        'lg': '14px',
+                        'xl': '16px',
+                        '2xl': '20px'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { overscroll-behavior-y: contain; background-color: #f1f5f9; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-slate-800 font-sans antialiased text-base">
+
+    <!-- ==================== HALAMAN LOGIN ==================== -->
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center">
+            <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="building-2" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800 mb-1">ACO</h1>
+            <p class="text-slate-500 text-sm mb-6">Silakan login untuk mengelola properti</p>
+            
+            <form id="loginForm" class="space-y-4" onsubmit="handleLogin(event)">
+                <div>
+                    <input type="text" id="username" placeholder="Username" required autocomplete="off"
+                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                </div>
+                <div>
+                    <input type="password" id="password" placeholder="Password" required
+                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                </div>
+                <div id="loginError" class="text-red-500 text-sm hidden">Username atau password salah!</div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold p-3 rounded-xl shadow-md transition active:scale-95">
+                    Masuk
+                </button>
+            </form>
+            <p class="mt-6 text-xs text-slate-500">Dibuat oleh <a href="https://masjidashqaf.com" target="_blank" rel="noopener noreferrer" class="text-indigo-600 font-medium hover:underline">masjidashqaf.com</a></p>
+        </div>
+    </div>
+
+    <!-- ==================== APLIKASI UTAMA ==================== -->
+    <div id="appScreen" class="hidden min-h-screen pb-20 md:pb-6">
+        
+        <!-- Header -->
+        <header class="bg-indigo-600 text-white sticky top-0 z-30 shadow-md">
+            <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="building-2" class="w-6 h-6"></i>
+                    <h1 class="text-xl font-bold">ACO</h1>
+                </div>
+                <button onclick="logout()" title="Keluar Aplikasi" class="p-2 bg-indigo-700 rounded-lg hover:bg-indigo-800 transition">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <!-- Tab Navigasi (Desktop & Mobile) -->
+            <nav class="max-w-5xl mx-auto px-4 flex justify-center gap-6 border-t border-indigo-500 pb-3 pt-3 no-scrollbar">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" title="Dashboard" class="nav-tab active flex items-center justify-center p-3 rounded-xl text-white bg-indigo-700 transition">
+                    <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+                </button>
+                <button onclick="switchTab('unit')" id="tab-unit" title="Unit & Aset" class="nav-tab flex items-center justify-center p-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition">
+                    <i data-lucide="home" class="w-6 h-6"></i>
+                </button>
+                <button onclick="switchTab('sewa')" id="tab-sewa" title="Transaksi Sewa" class="nav-tab flex items-center justify-center p-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition">
+                    <i data-lucide="wallet" class="w-6 h-6"></i>
+                </button>
+                <button onclick="switchTab('pengaturan')" id="tab-pengaturan" title="Pengaturan" class="nav-tab flex items-center justify-center p-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition">
+                    <i data-lucide="settings" class="w-6 h-6"></i>
+                </button>
+            </nav>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="max-w-5xl mx-auto p-4 md:p-6">
+            
+            <!-- TAB: DASHBOARD -->
+            <div id="view-dashboard" class="tab-content active space-y-6">
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="bg-green-100 text-green-600 p-3 rounded-xl"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
+                        <div>
+                            <p class="text-sm text-slate-500">Pemasukan (Sewa)</p>
+                            <h3 class="text-xl font-bold text-slate-800" id="dashPemasukan">Rp 0</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="bg-red-100 text-red-600 p-3 rounded-xl"><i data-lucide="trending-down" class="w-6 h-6"></i></div>
+                        <div>
+                            <p class="text-sm text-slate-500">Pengeluaran (Aset)</p>
+                            <h3 class="text-xl font-bold text-slate-800" id="dashPengeluaran">Rp 0</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="bg-indigo-100 text-indigo-600 p-3 rounded-xl"><i data-lucide="door-open" class="w-6 h-6"></i></div>
+                        <div>
+                            <p class="text-sm text-slate-500">Status Kamar</p>
+                            <h3 class="text-xl font-bold text-slate-800" id="dashKamarTerisi">0 dari 0 Terisi</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-5 border-b border-slate-100">
+                        <h2 class="font-bold text-slate-800">Riwayat Transaksi Terakhir</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                                <tr>
+                                    <th class="px-5 py-3">Tanggal</th>
+                                    <th class="px-5 py-3">Keterangan</th>
+                                    <th class="px-5 py-3">Tipe</th>
+                                    <th class="px-5 py-3 text-right">Nominal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableDashTrx" class="divide-y divide-slate-100">
+                                <!-- Rendered via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: DATA UNIT & ASET -->
+            <div id="view-unit" class="tab-content space-y-8">
+                <!-- Section 1: Daftar Kamar -->
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="grid" class="w-5 h-5 text-indigo-500"></i> Daftar Kamar
+                    </h2>
+                    <div id="gridKamar" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Section 2: Tabel Inventaris & Aset -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex justify-between items-center flex-wrap gap-3">
+                        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="package" class="w-5 h-5 text-indigo-500"></i> Inventaris & Aset
+                        </h2>
+                        <button onclick="openModal('modalAset')" title="Tambah Aset" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 p-2.5 rounded-lg transition">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                                <tr>
+                                    <th class="px-5 py-3">Aset</th>
+                                    <th class="px-5 py-3">Keperluan</th>
+                                    <th class="px-5 py-3">Harga Beli</th>
+                                    <th class="px-5 py-3">Foto</th>
+                                    <th class="px-5 py-3 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableAset" class="divide-y divide-slate-100">
+                                <!-- Rendered via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: TRANSAKSI SEWA -->
+            <div id="view-sewa" class="tab-content space-y-8">
+                <!-- Section 1: Status Sewa Aktif -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-5 border-b border-slate-100">
+                        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="user-check" class="w-5 h-5 text-indigo-500"></i> Status Sewa Aktif
+                        </h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                                <tr>
+                                    <th class="px-5 py-3">Kamar</th>
+                                    <th class="px-5 py-3">Penyewa</th>
+                                    <th class="px-5 py-3">Berakhir Pada</th>
+                                    <th class="px-5 py-3">Status</th>
+                                    <th class="px-5 py-3 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableSewaAktif" class="divide-y divide-slate-100">
+                                <!-- Rendered via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section 2: Riwayat Pembayaran Sewa -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex justify-between items-center flex-wrap gap-3">
+                        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="history" class="w-5 h-5 text-indigo-500"></i> Riwayat Pembayaran
+                        </h2>
+                        <button onclick="openInputSewa()" title="Input Sewa Baru" class="bg-indigo-600 text-white hover:bg-indigo-700 p-2.5 rounded-lg shadow-sm transition">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                                <tr>
+                                    <th class="px-5 py-3">Tanggal</th>
+                                    <th class="px-5 py-3">Keterangan</th>
+                                    <th class="px-5 py-3">Nominal</th>
+                                    <th class="px-5 py-3">Bukti</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableRiwayatSewa" class="divide-y divide-slate-100">
+                                <!-- Rendered via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: PENGATURAN -->
+            <div id="view-pengaturan" class="tab-content space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex justify-between items-center">
+                        <h2 class="font-bold text-slate-800">Master Data Kamar</h2>
+                        <button onclick="openModal('modalKamar')" title="Tambah Kamar" class="bg-slate-100 text-slate-700 hover:bg-slate-200 p-2.5 rounded-lg transition">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                                <tr>
+                                    <th class="px-5 py-3">Nama Kamar</th>
+                                    <th class="px-5 py-3">Harga/Bulan</th>
+                                    <th class="px-5 py-3">Fasilitas Bawaan</th>
+                                    <th class="px-5 py-3 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableMasterKamar" class="divide-y divide-slate-100">
+                                <!-- Rendered via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ==================== MODALS & OVERLAYS ==================== -->
+    
+    <!-- Modal Tambah/Edit Kamar -->
+    <div id="modalKamar" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold text-slate-800 mb-4" id="titleModalKamar">Tambah Kamar</h2>
+            <form id="formKamar" onsubmit="saveKamar(event)" class="space-y-4">
+                <input type="hidden" id="kamarId">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Nama/No Kamar</label>
+                    <input type="text" id="kamarNama" required class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Harga per Bulan (Rp)</label>
+                    <input type="number" id="kamarHarga" required class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Fasilitas Dasar (Pisahkan koma)</label>
+                    <input type="text" id="kamarFasilitas" placeholder="Contoh: Kasur, Lemari, AC" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Foto Cover (Opsional)</label>
+                    <input type="file" id="kamarFoto" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeModal('modalKamar')" class="w-1/2 p-2.5 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200">Batal</button>
+                    <button id="btnSimpanKamar" type="submit" class="w-1/2 p-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Aset -->
+    <div id="modalAset" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Catat Pembelian Aset</h2>
+            <form id="formAset" onsubmit="saveAset(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Nama Barang</label>
+                    <input type="text" id="asetNama" required class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Harga Beli (Rp)</label>
+                    <input type="number" id="asetHarga" required class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Keperluan</label>
+                    <select id="asetKeperluan" onchange="togglePilihKamar()" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white">
+                        <option value="Umum">Umum / Keseluruhan</option>
+                        <option value="Kamar">Fasilitas Kamar Spesifik</option>
+                    </select>
+                </div>
+                <div id="containerPilihKamar" class="hidden">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Pilih Kamar</label>
+                    <select id="asetKamarId" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white">
+                        <!-- Rendered via JS -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Foto Barang / Nota</label>
+                    <input type="file" id="asetFoto" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-indigo-50 file:text-indigo-700">
+                </div>
+                <div class="bg-indigo-50 p-3 rounded-lg text-xs text-indigo-700 flex gap-2 items-start mt-2">
+                    <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                    <p>Menyimpan ini otomatis membuat catatan <b>Pengeluaran</b> di sistem.</p>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeModal('modalAset')" class="w-1/2 p-2.5 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200">Batal</button>
+                    <button id="btnSimpanAset" type="submit" class="w-1/2 p-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700">Simpan Aset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Input Sewa Baru / Perpanjang -->
+    <div id="modalSewa" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold text-slate-800 mb-4" id="titleModalSewa">Input Pembayaran Sewa</h2>
+            <form id="formSewa" onsubmit="saveSewa(event)" class="space-y-4">
+                <input type="hidden" id="sewaMode" value="baru">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Pilih Kamar</label>
+                    <select id="sewaKamarId" onchange="kalkulasiSewa()" required class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 bg-white">
+                        <!-- Rendered via JS -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Nama Penyewa</label>
+                    <input type="text" id="sewaPenyewa" required class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Tgl Mulai</label>
+                        <input type="date" id="sewaTglMulai" required class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Durasi (Bulan)</label>
+                        <input type="number" id="sewaDurasi" value="1" min="1" required oninput="kalkulasiSewa()" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Bukti Transfer/KTP (Opsional)</label>
+                    <input type="file" id="sewaBukti" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-indigo-50 file:text-indigo-700">
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg border border-green-100 mt-2">
+                    <p class="text-xs text-green-600 font-semibold mb-1">Total Harus Dibayar:</p>
+                    <h3 class="text-xl font-bold text-green-700" id="sewaTotalTeks">Rp 0</h3>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeModal('modalSewa')" class="w-1/2 p-2.5 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200">Batal</button>
+                    <button id="btnSimpanSewa" type="submit" class="w-1/2 p-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700">Simpan Sewa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus/Checkout -->
+    <div id="modalConfirm" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-lg font-bold text-slate-800 mb-2" id="confirmTitle">Konfirmasi</h2>
+            <p class="text-slate-500 text-sm mb-6" id="confirmText">Apakah Anda yakin?</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal('modalConfirm')" class="w-1/2 p-2.5 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200">Batal</button>
+                <button id="btnConfirmAction" class="w-1/2 p-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Image Preview -->
+    <div id="modalLightbox" class="fixed inset-0 bg-black/90 z-[60] hidden flex flex-col items-center justify-center p-4" onclick="closeModal('modalLightbox')">
+        <button class="absolute top-4 right-4 text-white p-2 bg-white/10 rounded-full hover:bg-white/20 transition">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+        <img id="lightboxImage" src="" alt="Preview" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain">
+    </div>
+
+    <!-- PWA Install Banner -->
+    <div id="pwaInstallBanner" class="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.1)] z-[70] hidden flex justify-between items-center border-t border-indigo-100 rounded-t-2xl transform transition-transform duration-300 translate-y-full">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
+                <i data-lucide="download-cloud" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-800 text-sm">Install Aplikasi ACO</h4>
+                <p class="text-xs text-slate-500">Akses lebih cepat & hemat kuota</p>
+            </div>
+        </div>
+        <div class="flex gap-2 items-center">
+            <button id="btnDismissInstall" class="p-2 text-slate-400 hover:text-slate-600 transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <button id="btnInstallApp" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-indigo-700 transition active:scale-95">Install</button>
+        </div>
+    </div>
+
+    <!-- ==================== LOGIKA APLIKASI (FIREBASE & JAVASCRIPT) ==================== -->
+    <script type="module">
+        // 1. IMPORT FIREBASE LIBRARIES
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // 2. FIREBASE CONFIGURATION (Milik Anda)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCdJfCZwtqOh5TxEaOpjnAR2eMCP5HGm0w",
+            authDomain: "aco-app-794b2.firebaseapp.com",
+            projectId: "aco-app-794b2",
+            storageBucket: "aco-app-794b2.firebasestorage.app",
+            messagingSenderId: "146927559465",
+            appId: "1:146927559465:web:2a1909dc95c6d1d2904d38"
+        };
+
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // 3. STATE MANAGEMENT
+        const dummyImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%2364748b'%3ENo Image%3C/text%3E%3C/svg%3E";
+        
+        window.state = {
+            rooms: [],
+            assets: [],
+            transactions: []
+        };
+
+        // 4. HELPER FUNCTIONS
+        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
+        const formatTgl = (tgl) => {
+            if(!tgl) return "-";
+            return new Date(tgl).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        };
+        
+        // Kompresi Gambar agar ukuran < 1MB (Sesuai Limit Dokumen Firebase Firestore)
+        const getBase64Compressed = (file) => new Promise((resolve, reject) => {
+            if(!file) return resolve(dummyImg);
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800; // Resolusi diturunkan agar file kecil
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > MAX_WIDTH) {
+                        height = height * (MAX_WIDTH / width);
+                        width = MAX_WIDTH;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.6)); // Kualitas 60% JPEG
+                }
+            };
+            reader.onerror = error => reject(error);
+        });
+
+        const updateRoomStatuses = () => {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            window.state.rooms.forEach(room => {
+                if(room.tenantName && room.endDate) {
+                    const end = new Date(room.endDate);
+                    if(end < today) room.status = "Jatuh Tempo";
+                    else room.status = "Terisi";
+                } else {
+                    room.status = "Kosong";
+                }
+            });
+        };
+
+        // 5. MENGHUBUNGKAN FUNGSI KE WINDOW (Karena kita pakai tipe "module")
+        window.handleLogin = async (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const btn = document.querySelector('#loginForm button');
+
+            if(u === 'admin' && p === '24434') {
+                btn.innerText = "Menghubungkan...";
+                btn.disabled = true;
+                try {
+                    // Tunggu proses otentikasi selesai sebelum mulai mengambil data dari Firestore
+                    await signInAnonymously(auth);
+                    
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('appScreen').classList.remove('hidden');
+                    window.initApp();
+                } catch (error) {
+                    console.error("Gagal koneksi Firebase Auth:", error);
+                    document.getElementById('loginError').innerText = "Gagal terhubung ke database. Cek pengaturan Firebase Anda.";
+                    document.getElementById('loginError').classList.remove('hidden');
+                }
+                btn.innerText = "Masuk";
+                btn.disabled = false;
+            } else {
+                document.getElementById('loginError').innerText = "Username atau password salah!";
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        };
+
+        window.logout = () => {
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').classList.add('hidden');
+        };
+
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.nav-tab').forEach(el => {
+                el.classList.remove('active', 'bg-indigo-700', 'text-white');
+                el.classList.add('text-indigo-100', 'hover:bg-indigo-700');
+            });
+            const activeTabBtn = document.getElementById(`tab-${tabId}`);
+            activeTabBtn.classList.remove('text-indigo-100', 'hover:bg-indigo-700');
+            activeTabBtn.classList.add('active', 'bg-indigo-700', 'text-white');
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${tabId}`).classList.add('active');
+            window.renderAll();
+        };
+
+        window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+        window.openLightbox = (imgSrc) => {
+            document.getElementById('lightboxImage').src = imgSrc;
+            window.openModal('modalLightbox');
+        };
+
+        // --- RENDERERS ---
+        window.renderAll = () => {
+            updateRoomStatuses();
+            renderDashboard();
+            renderUnitAset();
+            renderSewa();
+            renderPengaturan();
+            lucide.createIcons();
+        };
+
+        const renderDashboard = () => {
+            const sumMasuk = window.state.transactions.filter(t => t.type === 'Pemasukan').reduce((a, b) => a + Number(b.amount), 0);
+            const sumKeluar = window.state.transactions.filter(t => t.type === 'Pengeluaran').reduce((a, b) => a + Number(b.amount), 0);
+            const sumTerisi = window.state.rooms.filter(r => r.status !== 'Kosong').length;
+            
+            document.getElementById('dashPemasukan').innerText = formatRp(sumMasuk);
+            document.getElementById('dashPengeluaran').innerText = formatRp(sumKeluar);
+            document.getElementById('dashKamarTerisi').innerText = `${sumTerisi} dari ${window.state.rooms.length}`;
+
+            // Transaksi terakhir (maks 5)
+            const htmlTrx = window.state.transactions.slice(0, 5).map(trx => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-5 py-3 whitespace-nowrap">${formatTgl(trx.date)}</td>
+                    <td class="px-5 py-3 text-slate-800">${trx.desc}</td>
+                    <td class="px-5 py-3">
+                        <span class="${trx.type === 'Pemasukan' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'} px-2 py-1 rounded text-xs font-semibold">
+                            ${trx.type}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3 text-right font-medium ${trx.type === 'Pemasukan' ? 'text-green-600' : 'text-red-600'}">
+                        ${trx.type === 'Pemasukan' ? '+' : '-'}${formatRp(trx.amount)}
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('tableDashTrx').innerHTML = htmlTrx || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Belum ada transaksi</td></tr>`;
+        };
+
+        const renderUnitAset = () => {
+            const htmlKamar = window.state.rooms.map(room => {
+                let badgeClass = "bg-slate-100 text-slate-600";
+                if(room.status === 'Terisi') badgeClass = "bg-green-100 text-green-700";
+                if(room.status === 'Jatuh Tempo') badgeClass = "bg-red-100 text-red-700";
+
+                return `
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                    <img src="${room.cover || dummyImg}" class="w-full h-40 object-cover bg-slate-200 cursor-pointer" onclick="window.openLightbox('${room.cover || dummyImg}')">
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-800">${room.name}</h3>
+                                <p class="text-indigo-600 font-semibold">${formatRp(room.price)}<span class="text-xs text-slate-400 font-normal">/bln</span></p>
+                            </div>
+                            <span class="${badgeClass} px-2 py-1 rounded text-xs font-bold border border-white">${room.status}</span>
+                        </div>
+                        
+                        ${room.status !== 'Kosong' ? `
+                        <div class="bg-slate-50 p-3 rounded-lg mb-3 mt-2 border border-slate-100">
+                            <p class="text-xs text-slate-500 mb-1">Penyewa Aktif:</p>
+                            <p class="font-semibold text-slate-700 flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> ${room.tenantName}</p>
+                            <p class="text-xs text-red-500 mt-1 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Jatuh Tempo: ${formatTgl(room.endDate)}</p>
+                        </div>
+                        ` : '<div class="h-4"></div>'}
+
+                        <div class="mt-auto pt-3 border-t border-slate-100">
+                            <p class="text-xs text-slate-400 mb-2">Fasilitas:</p>
+                            <div class="flex flex-wrap gap-1">
+                                ${room.facilities.map(f => `<span class="bg-indigo-50 text-indigo-600 text-[10px] px-2 py-1 rounded">${f}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            document.getElementById('gridKamar').innerHTML = htmlKamar || `<div class="col-span-full text-center py-10 text-slate-400">Belum ada data kamar</div>`;
+
+            const htmlAset = window.state.assets.map(aset => {
+                const tujuan = aset.type === 'Umum' ? 'Umum' : `Kamar: ${window.state.rooms.find(r=>r.id === aset.roomId)?.name || 'Dihapus'}`;
+                return `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-5 py-3 font-medium text-slate-700">${aset.name}<br><span class="text-xs text-slate-400 font-normal">${formatTgl(aset.date)}</span></td>
+                    <td class="px-5 py-3"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">${tujuan}</span></td>
+                    <td class="px-5 py-3 text-red-600 font-medium">${formatRp(aset.price)}</td>
+                    <td class="px-5 py-3">
+                        <button onclick="window.openLightbox('${aset.image || dummyImg}')" title="Lihat Foto" class="text-indigo-500 hover:text-indigo-700 p-1.5 bg-indigo-50 hover:bg-indigo-100 rounded transition"><i data-lucide="image" class="w-4 h-4"></i></button>
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                        <button onclick="window.confirmDelete('aset', '${aset.id}')" title="Hapus Aset" class="text-red-500 hover:text-red-700 p-1.5 bg-red-50 hover:bg-red-100 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+            document.getElementById('tableAset').innerHTML = htmlAset || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Belum ada data aset</td></tr>`;
+        };
+
+        const renderSewa = () => {
+            const terisi = window.state.rooms.filter(r => r.status !== 'Kosong');
+            const htmlAktif = terisi.map(room => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-5 py-3 font-bold text-slate-700">${room.name}</td>
+                    <td class="px-5 py-3 font-medium text-indigo-700">${room.tenantName}</td>
+                    <td class="px-5 py-3 text-sm">${formatTgl(room.endDate)}</td>
+                    <td class="px-5 py-3">
+                        <span class="${room.status === 'Jatuh Tempo' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'} px-2 py-1 rounded text-xs font-semibold">
+                            ${room.status}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3 text-right space-x-1 whitespace-nowrap">
+                        <button onclick="window.openPerpanjangSewa('${room.id}')" title="Perpanjang Sewa" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 p-1.5 rounded transition"><i data-lucide="calendar-plus" class="w-4 h-4"></i></button>
+                        <button onclick="window.confirmCheckout('${room.id}')" title="Kosongkan Kamar" class="bg-red-100 text-red-700 hover:bg-red-200 p-1.5 rounded transition"><i data-lucide="door-open" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('tableSewaAktif').innerHTML = htmlAktif || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Semua kamar kosong</td></tr>`;
+
+            const htmlRiwayat = window.state.transactions.filter(t => t.type === 'Pemasukan').map(trx => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-5 py-3 whitespace-nowrap">${formatTgl(trx.date)}</td>
+                    <td class="px-5 py-3 text-slate-700">${trx.desc}</td>
+                    <td class="px-5 py-3 text-green-600 font-bold">+${formatRp(trx.amount)}</td>
+                    <td class="px-5 py-3">
+                        ${trx.image && trx.image !== dummyImg ? `<button onclick="window.openLightbox('${trx.image}')" title="Lihat Bukti" class="text-indigo-500 hover:text-indigo-700 p-1.5 bg-indigo-50 hover:bg-indigo-100 rounded transition"><i data-lucide="file-text" class="w-4 h-4"></i></button>` : '-'}
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('tableRiwayatSewa').innerHTML = htmlRiwayat || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Belum ada riwayat sewa</td></tr>`;
+        };
+
+        const renderPengaturan = () => {
+            const htmlKamar = window.state.rooms.map(room => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-5 py-3 font-bold text-slate-700">${room.name}</td>
+                    <td class="px-5 py-3 text-indigo-600 font-medium">${formatRp(room.price)}</td>
+                    <td class="px-5 py-3 text-xs text-slate-500">${room.facilities.join(', ')}</td>
+                    <td class="px-5 py-3 text-right space-x-1 whitespace-nowrap">
+                        <button onclick="window.editKamar('${room.id}')" title="Edit Kamar" class="bg-slate-100 text-slate-600 hover:bg-indigo-100 hover:text-indigo-600 p-1.5 rounded transition"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                        <button onclick="window.confirmDelete('kamar', '${room.id}')" title="Hapus Kamar" class="bg-slate-100 text-slate-600 hover:bg-red-100 hover:text-red-600 p-1.5 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('tableMasterKamar').innerHTML = htmlKamar || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Data master kosong</td></tr>`;
+        };
+
+        // --- AKSI DATA (Menyimpan Ke Firestore) ---
+        window.editKamar = (id) => {
+            const room = window.state.rooms.find(r => r.id === id);
+            document.getElementById('titleModalKamar').innerText = "Edit Kamar";
+            document.getElementById('kamarId').value = room.id;
+            document.getElementById('kamarNama').value = room.name;
+            document.getElementById('kamarHarga').value = room.price;
+            document.getElementById('kamarFasilitas').value = room.facilities.join(', ');
+            window.openModal('modalKamar');
+        };
+
+        window.saveKamar = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSimpanKamar');
+            btn.innerText = "Menyimpan..."; btn.disabled = true;
+
+            const id = document.getElementById('kamarId').value;
+            const name = document.getElementById('kamarNama').value;
+            const price = Number(document.getElementById('kamarHarga').value);
+            const facilities = document.getElementById('kamarFasilitas').value.split(',').map(s => s.trim()).filter(s=>s);
+            const file = document.getElementById('kamarFoto').files[0];
+            
+            try {
+                let cover = id ? window.state.rooms.find(r=>r.id===id).cover : dummyImg;
+                if(file) cover = await getBase64Compressed(file);
+
+                if(id) {
+                    await updateDoc(doc(db, "rooms", id), { name, price, facilities, cover });
+                } else {
+                    await addDoc(collection(db, "rooms"), { 
+                        name, price, status: 'Kosong', tenantName: '', startDate: '', endDate: '', facilities, cover, timestamp: Date.now() 
+                    });
+                }
+                e.target.reset();
+                document.getElementById('kamarId').value = '';
+                document.getElementById('titleModalKamar').innerText = "Tambah Kamar";
+                window.closeModal('modalKamar');
+            } catch (err) {
+                console.error("Gagal simpan kamar:", err);
+                alert("Gagal menyimpan data.");
+            }
+            btn.innerText = "Simpan"; btn.disabled = false;
+        };
+
+        window.togglePilihKamar = () => {
+            const val = document.getElementById('asetKeperluan').value;
+            const container = document.getElementById('containerPilihKamar');
+            if(val === 'Kamar') {
+                document.getElementById('asetKamarId').innerHTML = window.state.rooms.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        };
+
+        window.saveAset = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSimpanAset');
+            btn.innerText = "Menyimpan..."; btn.disabled = true;
+
+            try {
+                const name = document.getElementById('asetNama').value;
+                const price = Number(document.getElementById('asetHarga').value);
+                const type = document.getElementById('asetKeperluan').value;
+                const roomId = type === 'Kamar' ? document.getElementById('asetKamarId').value : null;
+                const file = document.getElementById('asetFoto').files[0];
+                const image = file ? await getBase64Compressed(file) : dummyImg;
+                const today = new Date().toISOString().split('T')[0];
+
+                // 1. Simpan Aset
+                await addDoc(collection(db, "assets"), { name, price, type, roomId, date: today, image, timestamp: Date.now() });
+
+                // 2. Transaksi & Update Kamar
+                let desc = `Beli ${name} (${type})`;
+                if(type === 'Kamar') {
+                    const room = window.state.rooms.find(r=>r.id === roomId);
+                    desc = `Beli ${name} untuk ${room.name}`;
+                    if(!room.facilities.includes(name)) {
+                        await updateDoc(doc(db, "rooms", roomId), { facilities: [...room.facilities, name] });
+                    }
+                }
+                await addDoc(collection(db, "transactions"), { type: 'Pengeluaran', category: 'Aset', amount: price, date: today, desc, image, timestamp: Date.now() });
+
+                e.target.reset();
+                window.closeModal('modalAset');
+                window.togglePilihKamar();
+            } catch (err) {
+                console.error("Error save aset", err);
+                alert("Gagal simpan aset.");
+            }
+            btn.innerText = "Simpan Aset"; btn.disabled = false;
+        };
+
+        window.openInputSewa = () => {
+            document.getElementById('titleModalSewa').innerText = "Input Sewa Baru";
+            document.getElementById('sewaMode').value = "baru";
+            document.getElementById('sewaPenyewa').disabled = false;
+            document.getElementById('sewaPenyewa').value = "";
+            document.getElementById('sewaTglMulai').value = new Date().toISOString().split('T')[0];
+            document.getElementById('sewaDurasi').value = 1;
+            
+            const options = window.state.rooms.filter(r => r.status === 'Kosong').map(r => `<option value="${r.id}">${r.name} - ${formatRp(r.price)}/bln</option>`).join('');
+            document.getElementById('sewaKamarId').innerHTML = options || `<option value="" disabled selected>-- Semua Kamar Terisi --</option>`;
+            
+            window.kalkulasiSewa();
+            window.openModal('modalSewa');
+        };
+
+        window.openPerpanjangSewa = (roomId) => {
+            const room = window.state.rooms.find(r => r.id === roomId);
+            document.getElementById('titleModalSewa').innerText = "Perpanjang Sewa";
+            document.getElementById('sewaMode').value = "perpanjang";
+            document.getElementById('sewaKamarId').innerHTML = `<option value="${room.id}">${room.name} - ${formatRp(room.price)}/bln</option>`;
+            document.getElementById('sewaPenyewa').value = room.tenantName;
+            document.getElementById('sewaPenyewa').disabled = true;
+            document.getElementById('sewaTglMulai').value = new Date().toISOString().split('T')[0];
+            document.getElementById('sewaDurasi').value = 1;
+            
+            window.kalkulasiSewa();
+            window.openModal('modalSewa');
+        };
+
+        window.kalkulasiSewa = () => {
+            const roomId = document.getElementById('sewaKamarId').value;
+            const durasi = Number(document.getElementById('sewaDurasi').value) || 0;
+            if(!roomId) { document.getElementById('sewaTotalTeks').innerText = 'Rp 0'; return; }
+            const price = window.state.rooms.find(r => r.id === roomId).price;
+            document.getElementById('sewaTotalTeks').innerText = formatRp(price * durasi);
+        };
+
+        window.saveSewa = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSimpanSewa');
+            btn.innerText = "Memproses..."; btn.disabled = true;
+
+            try {
+                const mode = document.getElementById('sewaMode').value;
+                const roomId = document.getElementById('sewaKamarId').value;
+                if(!roomId) throw new Error("Pilih kamar!");
+                
+                const tenantName = document.getElementById('sewaPenyewa').value;
+                const tglMulai = document.getElementById('sewaTglMulai').value;
+                const durasi = Number(document.getElementById('sewaDurasi').value);
+                const file = document.getElementById('sewaBukti').files[0];
+                const image = file ? await getBase64Compressed(file) : dummyImg;
+
+                const room = window.state.rooms.find(r => r.id === roomId);
+                const amount = room.price * durasi;
+
+                const startDateObj = new Date(tglMulai);
+                const endDateObj = new Date(startDateObj);
+                endDateObj.setMonth(endDateObj.getMonth() + durasi);
+                const tglEnd = endDateObj.toISOString().split('T')[0];
+
+                await updateDoc(doc(db, "rooms", roomId), {
+                    status: 'Terisi', tenantName: tenantName, startDate: tglMulai, endDate: tglEnd
+                });
+
+                const desc = mode === 'baru' ? `Sewa Baru ${room.name} (${tenantName}) - ${durasi} Bln` : `Perpanjang ${room.name} (${tenantName}) - ${durasi} Bln`;
+                await addDoc(collection(db, "transactions"), {
+                    type: 'Pemasukan', category: 'Sewa', amount, date: tglMulai, desc, image, timestamp: Date.now()
+                });
+
+                e.target.reset();
+                window.closeModal('modalSewa');
+            } catch (err) {
+                console.error("Gagal bayar sewa", err);
+                alert("Gagal memproses sewa.");
+            }
+            btn.innerText = "Simpan Sewa"; btn.disabled = false;
+        };
+
+        window.confirmCheckout = (roomId) => {
+            window.confirmAction("Kosongkan Kamar", "Penyewa akan dikeluarkan. Lanjutkan?", async () => {
+                await updateDoc(doc(db, "rooms", roomId), { status: 'Kosong', tenantName: '', startDate: '', endDate: '' });
+            });
+        };
+
+        let currentConfirmAction = null;
+        window.confirmAction = (title, text, callback) => {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmText').innerText = text;
+            currentConfirmAction = callback;
+            window.openModal('modalConfirm');
+        };
+        
+        document.getElementById('btnConfirmAction').addEventListener('click', async () => {
+            if(currentConfirmAction) {
+                const btn = document.getElementById('btnConfirmAction');
+                btn.innerText = "Memproses...";
+                await currentConfirmAction();
+                btn.innerText = "Ya, Lanjutkan";
+            }
+            window.closeModal('modalConfirm');
+        });
+
+        window.confirmDelete = (type, id) => {
+            window.confirmAction("Hapus Data", "Data yang dihapus tidak bisa dikembalikan. Lanjut?", async () => {
+                if(type === 'kamar') await deleteDoc(doc(db, "rooms", id));
+                if(type === 'aset') await deleteDoc(doc(db, "assets", id));
+            });
+        };
+
+        // --- PWA INSTALL PROMPT LOGIC ---
+        let deferredPrompt;
+        const installBanner = document.getElementById('pwaInstallBanner');
+        const btnInstall = document.getElementById('btnInstallApp');
+        const btnDismiss = document.getElementById('btnDismissInstall');
+
+        // Dengarkan event dari browser jika app siap diinstal
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Cegah banner mini bawaan browser muncul (kita pakai yang kustom)
+            e.preventDefault();
+            // Simpan event untuk dipicu nanti
+            deferredPrompt = e;
+            // Tampilkan banner kustom kita dengan animasi
+            installBanner.classList.remove('hidden');
+            setTimeout(() => {
+                installBanner.classList.remove('translate-y-full');
+            }, 50);
+        });
+
+        // Tombol Install diklik
+        btnInstall.addEventListener('click', async () => {
+            installBanner.classList.add('translate-y-full');
+            setTimeout(() => installBanner.classList.add('hidden'), 300);
+            
+            if (deferredPrompt) {
+                // Munculkan prompt dialog instalasi bawaan OS/Browser
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User respons install: ${outcome}`);
+                deferredPrompt = null; // Buang setelah dipakai
+            }
+        });
+
+        // Tombol Silang (Tutup Banner) diklik
+        btnDismiss.addEventListener('click', () => {
+            installBanner.classList.add('translate-y-full');
+            setTimeout(() => installBanner.classList.add('hidden'), 300);
+        });
+
+        // Jika berhasil diinstal, sembunyikan banner selamanya (di sesi ini)
+        window.addEventListener('appinstalled', () => {
+            installBanner.classList.add('hidden');
+            deferredPrompt = null;
+            console.log('Aplikasi ACO berhasil diinstal!');
+        });
+
+        // 6. INIT APP (Memasang pendengar database Realtime)
+        window.initApp = () => {
+            // Dengarkan perubahan data secara realtime (Snapshot)
+            onSnapshot(collection(db, "rooms"), (snapshot) => {
+                window.state.rooms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                window.renderAll();
+            }, (err) => console.error("Room listener error", err));
+
+            onSnapshot(collection(db, "assets"), (snapshot) => {
+                window.state.assets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Urutkan dari yang terbaru
+                window.state.assets.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+                window.renderAll();
+            }, (err) => console.error("Asset listener error", err));
+
+            onSnapshot(collection(db, "transactions"), (snapshot) => {
+                window.state.transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Urutkan dari yang terbaru (Descending)
+                window.state.transactions.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+                window.renderAll();
+            }, (err) => console.error("Transaction listener error", err));
+        };
+        
+        // --- PWA REGISTRATION ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((reg) => console.log('SW Registered', reg.scope))
+                    .catch((err) => console.log('SW Failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
