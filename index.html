@@ -54,7 +54,7 @@
             </div>
             <div class="flex items-center justify-center gap-2 mb-1">
                 <h1 class="text-2xl font-bold text-slate-800">ACO</h1>
-                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">v2.11</span>
+                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">v2.12</span>
             </div>
             <p class="text-slate-500 text-sm mb-6">Silakan login untuk mengelola properti</p>
             
@@ -552,7 +552,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBNWxxQIhfMforEazNKzsqOAXPb8FObO1I",
@@ -566,7 +565,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const storage = getStorage(app); 
 
         const dummyImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%2364748b'%3ENo Image%3C/text%3E%3C/svg%3E";
         
@@ -584,7 +582,7 @@
             return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()} ${dt.getHours()}:${dt.getMinutes()}`;
         }
         
-        // FUNGSI KOMPRESI BARU (Alternatif 1: Menggunakan URL.createObjectURL)
+        // FUNGSI KOMPRESI TEKS (Menggunakan URL.createObjectURL - Anti Gagal Baca Galeri Chrome)
         const compressImageToBase64 = (file) => new Promise((resolve, reject) => {
             if(!file) return resolve(dummyImg);
             if (!file.type.match('image.*')) return reject(new Error("Bukan file gambar."));
@@ -594,15 +592,14 @@
                 return reject(new Error("Ukuran foto terlalu besar (Maks 10 MB)."));
             }
             
-            // Menggunakan Object URL (Jalan pintas memori, anti-gagal baca di Chrome Android)
             const imgUrl = URL.createObjectURL(file);
             const img = new Image();
             
             img.onload = () => {
-                URL.revokeObjectURL(imgUrl); // Bersihkan memori segera setelah foto ditangkap
+                URL.revokeObjectURL(imgUrl);
                 
                 const canvas = document.createElement('canvas');
-                const MAX_DIMENSION = 800; // Ukuran diperkecil agar cepat
+                const MAX_DIMENSION = 800; // Ukuran diperkecil agar file ringan (100kb)
                 let width = img.width;
                 let height = img.height;
                 
@@ -629,22 +626,6 @@
             
             img.src = imgUrl;
         });
-
-        const uploadImageToStorage = async (base64Data, folderName) => {
-            if (!base64Data || base64Data === dummyImg) return dummyImg;
-            if (base64Data.startsWith('http')) return base64Data;
-
-            try {
-                const fileName = `${folderName}/${Date.now()}_${Math.random().toString(36).substring(2,8)}.jpg`;
-                const storageRef = ref(storage, fileName);
-                await uploadString(storageRef, base64Data, 'data_url');
-                const downloadURL = await getDownloadURL(storageRef);
-                return downloadURL;
-            } catch (err) {
-                console.error("Error upload:", err);
-                throw new Error("Gagal mengunggah foto ke internet.");
-            }
-        };
 
         const updateRoomStatuses = () => {
             const today = new Date();
@@ -1096,6 +1077,7 @@
             btn.innerText = "Memproses..."; btn.disabled = true;
 
             try {
+                // Di sini foto dikompres jadi Base64
                 const base64Foto = fileFoto ? await compressImageToBase64(fileFoto) : dummyImg;
                 const base64Bukti = fileBukti ? await compressImageToBase64(fileBukti) : dummyImg;
 
@@ -1165,34 +1147,25 @@
         window.saveKamar = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanKamar');
-            btn.innerText = "Mengunggah & Menyimpan..."; btn.disabled = true;
+            btn.innerText = "Menyimpan..."; btn.disabled = true;
 
             const id = document.getElementById('kamarId').value;
             const name = document.getElementById('kamarNama').value;
             const price = Number(document.getElementById('kamarHarga').value);
             const file = document.getElementById('kamarFoto').files[0];
-            const facilitiesList = [...window.tempFasilitas]; 
+            const facilities = [...window.tempFasilitas]; 
             
             try {
-                // Upload Paralel Cover + Semua Fasilitas
-                const [coverUrl, facilities] = await Promise.all([
-                    (async () => {
-                        if (!file) return id ? window.state.rooms.find(r=>r.id===id).cover : dummyImg;
-                        const base64Cover = await compressImageToBase64(file);
-                        return uploadImageToStorage(base64Cover, 'kamar_covers');
-                    })(),
-                    Promise.all(facilitiesList.map(async (fac) => {
-                        const itemUrl = await uploadImageToStorage(fac.itemImage, 'fasilitas_items');
-                        const receiptUrl = await uploadImageToStorage(fac.receiptImage, 'fasilitas_receipts');
-                        return { ...fac, itemImage: itemUrl, receiptImage: receiptUrl };
-                    }))
-                ]);
+                let base64Cover = id ? window.state.rooms.find(r=>r.id===id).cover : dummyImg;
+                if(file) {
+                    base64Cover = await compressImageToBase64(file);
+                }
 
                 if(id) {
-                    await updateDoc(doc(db, "rooms", id), { name, price, facilities, cover: coverUrl });
+                    await updateDoc(doc(db, "rooms", id), { name, price, facilities, cover: base64Cover });
                 } else {
                     await addDoc(collection(db, "rooms"), { 
-                        name, price, status: 'Kosong', tenantName: '', startDate: '', endDate: '', facilities, cover: coverUrl, timestamp: Date.now() 
+                        name, price, status: 'Kosong', tenantName: '', startDate: '', endDate: '', facilities, cover: base64Cover, timestamp: Date.now() 
                     });
                 }
                 window.closeModal('modalKamar');
@@ -1217,7 +1190,7 @@
         window.saveAset = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanAset');
-            btn.innerText = "Mengunggah Data..."; btn.disabled = true;
+            btn.innerText = "Menyimpan Data..."; btn.disabled = true;
 
             try {
                 const date = document.getElementById('asetTanggal').value;
@@ -1230,20 +1203,14 @@
                 const fileFoto = document.getElementById('asetFoto').files[0];
                 const fileNota = document.getElementById('asetNota').files[0];
                 
-                // SISTEM BARU: Kompresi & Upload Paralel (Berjalan Bersamaan)
-                const [imageUrl, receiptUrl] = await Promise.all([
-                    (async () => {
-                        const b64 = fileFoto ? await compressImageToBase64(fileFoto) : dummyImg;
-                        return uploadImageToStorage(b64, 'aset_items');
-                    })(),
-                    (async () => {
-                        const b64 = fileNota ? await compressImageToBase64(fileNota) : dummyImg;
-                        return uploadImageToStorage(b64, 'aset_receipts');
-                    })()
+                // SISTEM Teks Base64 PARALEL: Kompresi berjalan bersamaan
+                const [base64Foto, base64Nota] = await Promise.all([
+                    fileFoto ? compressImageToBase64(fileFoto) : dummyImg,
+                    fileNota ? compressImageToBase64(fileNota) : dummyImg
                 ]);
 
                 const assetRef = await addDoc(collection(db, "assets"), { 
-                    name, price, type, roomId, date, condition, image: imageUrl, receiptImage: receiptUrl, status: 'Normal', history: [], timestamp: Date.now() 
+                    name, price, type, roomId, date, condition, image: base64Foto, receiptImage: base64Nota, status: 'Normal', history: [], timestamp: Date.now() 
                 });
 
                 let desc = `Beli ${name} (${condition}) - ${type}`;
@@ -1251,11 +1218,11 @@
                     const room = window.state.rooms.find(r=>r.id === roomId);
                     desc = `Beli ${name} (${condition}) untuk ${room.name}`;
                     
-                    const newFacility = { id: Date.now(), assetId: assetRef.id, name: name, condition: condition, itemImage: imageUrl, receiptImage: receiptUrl };
+                    const newFacility = { id: Date.now(), assetId: assetRef.id, name: name, condition: condition, itemImage: base64Foto, receiptImage: base64Nota };
                     await updateDoc(doc(db, "rooms", roomId), { facilities: [...room.facilities, newFacility] });
                 }
                 
-                await addDoc(collection(db, "transactions"), { type: 'Pengeluaran', category: 'Aset', assetId: assetRef.id, amount: price, date, desc, image: receiptUrl, timestamp: Date.now() });
+                await addDoc(collection(db, "transactions"), { type: 'Pengeluaran', category: 'Aset', assetId: assetRef.id, amount: price, date, desc, image: base64Nota, timestamp: Date.now() });
 
                 e.target.reset();
                 window.closeModal('modalAset');
@@ -1359,7 +1326,7 @@
         window.saveSewa = async (e) => { 
             e.preventDefault();
             const btn = document.getElementById('btnSimpanSewa');
-            btn.innerText = "Mengunggah Dokumen..."; btn.disabled = true;
+            btn.innerText = "Memproses Dokumen..."; btn.disabled = true;
 
             try {
                 const mode = document.getElementById('sewaMode').value;
@@ -1389,17 +1356,13 @@
                 const fileKtp = document.getElementById('sewaKtp').files[0];
                 const fileBukti = document.getElementById('sewaBukti').files[0];
                 
-                // SISTEM BARU: Kompresi & Upload Paralel (Berjalan Bersamaan)
-                const [ktpUrl, buktiUrl] = await Promise.all([
+                // SISTEM Teks Base64 PARALEL: Kompresi berjalan bersamaan
+                const [base64Ktp, base64Bukti] = await Promise.all([
                     (async () => {
                         if (mode === 'perpanjang' && !fileKtp && room.tenantKtp) return room.tenantKtp;
-                        const b64 = fileKtp ? await compressImageToBase64(fileKtp) : dummyImg;
-                        return uploadImageToStorage(b64, 'sewa_ktp');
+                        return fileKtp ? compressImageToBase64(fileKtp) : dummyImg;
                     })(),
-                    (async () => {
-                        const b64 = fileBukti ? await compressImageToBase64(fileBukti) : dummyImg;
-                        return uploadImageToStorage(b64, 'sewa_bukti');
-                    })()
+                    fileBukti ? compressImageToBase64(fileBukti) : dummyImg
                 ]);
 
                 const amount = room.price * durasi;
@@ -1410,14 +1373,14 @@
                 const tglEnd = endDateObj.toISOString().split('T')[0];
 
                 await updateDoc(doc(db, "rooms", roomId), {
-                    status: 'Terisi', tenantName: tenantName, tenantPhone: tenantPhone, startDate: tglMulai, endDate: tglEnd, tenantKtp: ktpUrl
+                    status: 'Terisi', tenantName: tenantName, tenantPhone: tenantPhone, startDate: tglMulai, endDate: tglEnd, tenantKtp: base64Ktp
                 });
 
                 const todayDate = new Date().toISOString().split('T')[0];
                 const desc = mode === 'baru' ? `Sewa Baru ${room.name} (${tenantName}) : ${durasiTeks}` : `Perpanjang ${room.name} (${tenantName}) : ${durasiTeks}`;
                 
                 await addDoc(collection(db, "transactions"), {
-                    type: 'Pemasukan', category: 'Sewa', amount, date: todayDate, desc, image: buktiUrl, ktpImage: ktpUrl, timestamp: Date.now()
+                    type: 'Pemasukan', category: 'Sewa', amount, date: todayDate, desc, image: base64Bukti, ktpImage: base64Ktp, timestamp: Date.now()
                 });
 
                 e.target.reset();
