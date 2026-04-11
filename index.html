@@ -246,7 +246,6 @@
         </main>
     </div>
 
-    <!-- Modal Detail Aset -->
     <div id="modalAssetDetail" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-start border-b border-slate-100 pb-3 mb-4">
@@ -291,7 +290,6 @@
         </div>
     </div>
 
-    <!-- Modal Edit Aset -->
     <div id="modalEditAsset" class="fixed inset-0 bg-slate-900/60 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
             <h2 class="text-lg font-bold text-slate-800 mb-4">Edit Data Aset</h2>
@@ -319,7 +317,6 @@
         </div>
     </div>
 
-    <!-- Modal Status Aset -->
     <div id="modalStatusAsset" class="fixed inset-0 bg-slate-900/60 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
             <h2 class="text-lg font-bold text-slate-800 mb-4">Ubah Status Aset</h2>
@@ -344,7 +341,6 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Aset -->
     <div id="modalAset" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold text-slate-800 mb-4">Catat Pembelian Aset</h2>
@@ -399,7 +395,6 @@
         </div>
     </div>
 
-    <!-- Modal Tambah/Edit Kamar -->
     <div id="modalKamar" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold text-slate-800 mb-4" id="titleModalKamar">Tambah Kamar</h2>
@@ -466,7 +461,6 @@
         </div>
     </div>
 
-    <!-- Modal Sewa -->
     <div id="modalSewa" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold text-slate-800 mb-4" id="titleModalSewa">Input Pembayaran Sewa</h2>
@@ -516,7 +510,6 @@
         </div>
     </div>
 
-    <!-- Modal Confirm -->
     <div id="modalConfirm" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -531,13 +524,11 @@
         </div>
     </div>
 
-    <!-- Lightbox -->
     <div id="modalLightbox" class="fixed inset-0 bg-black/90 z-[70] hidden flex flex-col items-center justify-center p-4" onclick="closeModal('modalLightbox')">
         <button class="absolute top-4 right-4 text-white p-2 bg-white/10 rounded-full hover:bg-white/20 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
         <img id="lightboxImage" src="" alt="Preview" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain">
     </div>
 
-    <!-- PWA Banner -->
     <div id="pwaInstallBanner" class="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.1)] z-[80] hidden flex justify-between items-center border-t border-indigo-100 rounded-t-2xl transform transition-transform duration-300 translate-y-full">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
@@ -558,7 +549,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // MODUL BARU: Menambahkan Firebase Storage
         import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         const firebaseConfig = {
@@ -573,7 +563,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const storage = getStorage(app); // INISIALISASI STORAGE
+        const storage = getStorage(app); 
 
         const dummyImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%2364748b'%3ENo Image%3C/text%3E%3C/svg%3E";
         
@@ -591,10 +581,15 @@
             return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()} ${dt.getHours()}:${dt.getMinutes()}`;
         }
         
-        // FUNGSI BARU 1: Kompresi gambar menjadi ukuran sangat kecil (~100kb)
+        // FUNGSI KOMPRESI BARU (Lebih Kecil & Ringan)
         const compressImageToBase64 = (file) => new Promise((resolve, reject) => {
             if(!file) return resolve(dummyImg);
             if (!file.type.match('image.*')) return reject(new Error("Bukan file gambar."));
+
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                return reject(new Error("Ukuran foto terlalu besar (Maks 10 MB)."));
+            }
             
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -602,7 +597,7 @@
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_DIMENSION = 1024; // Dimensi maksimal agar file tidak berat
+                    const MAX_DIMENSION = 800; // Ukuran diperkecil agar cepat
                     let width = img.width;
                     let height = img.height;
                     
@@ -619,35 +614,27 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // Kualitas 0.6 sangat ideal untuk mencapai ~90-120KB
                     resolve(canvas.toDataURL('image/jpeg', 0.6));
                 };
-                img.onerror = () => reject(new Error("Format rusak."));
+                img.onerror = () => reject(new Error("Format gambar rusak / tidak didukung."));
                 img.src = e.target.result;
             };
             reader.onerror = () => reject(new Error("Gagal membaca file dari penyimpanan."));
         });
 
-        // FUNGSI BARU 2: Mengunggah gambar yang sudah dikompres ke Firebase Storage
         const uploadImageToStorage = async (base64Data, folderName) => {
             if (!base64Data || base64Data === dummyImg) return dummyImg;
-            // Jika sudah berupa URL (misal dari data lama), tidak perlu di-upload ulang
             if (base64Data.startsWith('http')) return base64Data;
 
             try {
-                // Buat nama file unik
                 const fileName = `${folderName}/${Date.now()}_${Math.random().toString(36).substring(2,8)}.jpg`;
                 const storageRef = ref(storage, fileName);
-                
-                // Upload format base64 ke Storage
                 await uploadString(storageRef, base64Data, 'data_url');
-                
-                // Ambil URL Publik untuk disimpan di database (Firestore)
                 const downloadURL = await getDownloadURL(storageRef);
                 return downloadURL;
             } catch (err) {
-                console.error("Error upload ke storage:", err);
-                throw new Error("Gagal mengunggah foto ke gudang sistem.");
+                console.error("Error upload:", err);
+                throw new Error("Gagal mengunggah foto ke internet.");
             }
         };
 
@@ -1101,7 +1088,6 @@
             btn.innerText = "Memproses..."; btn.disabled = true;
 
             try {
-                // Di sini foto hanya dikompres jadi Base64 kecil untuk preview sementara
                 const base64Foto = fileFoto ? await compressImageToBase64(fileFoto) : dummyImg;
                 const base64Bukti = fileBukti ? await compressImageToBase64(fileBukti) : dummyImg;
 
@@ -1177,21 +1163,22 @@
             const name = document.getElementById('kamarNama').value;
             const price = Number(document.getElementById('kamarHarga').value);
             const file = document.getElementById('kamarFoto').files[0];
+            const facilitiesList = [...window.tempFasilitas]; 
             
             try {
-                // Proses Cover Kamar
-                let coverUrl = id ? window.state.rooms.find(r=>r.id===id).cover : dummyImg;
-                if(file) {
-                    const base64Cover = await compressImageToBase64(file);
-                    coverUrl = await uploadImageToStorage(base64Cover, 'kamar_covers');
-                }
-
-                // Proses Upload Fasilitas yang tadinya baru preview
-                const facilities = await Promise.all([...window.tempFasilitas].map(async (fac) => {
-                    const itemUrl = await uploadImageToStorage(fac.itemImage, 'fasilitas_items');
-                    const receiptUrl = await uploadImageToStorage(fac.receiptImage, 'fasilitas_receipts');
-                    return { ...fac, itemImage: itemUrl, receiptImage: receiptUrl };
-                }));
+                // Upload Paralel Cover + Semua Fasilitas
+                const [coverUrl, facilities] = await Promise.all([
+                    (async () => {
+                        if (!file) return id ? window.state.rooms.find(r=>r.id===id).cover : dummyImg;
+                        const base64Cover = await compressImageToBase64(file);
+                        return uploadImageToStorage(base64Cover, 'kamar_covers');
+                    })(),
+                    Promise.all(facilitiesList.map(async (fac) => {
+                        const itemUrl = await uploadImageToStorage(fac.itemImage, 'fasilitas_items');
+                        const receiptUrl = await uploadImageToStorage(fac.receiptImage, 'fasilitas_receipts');
+                        return { ...fac, itemImage: itemUrl, receiptImage: receiptUrl };
+                    }))
+                ]);
 
                 if(id) {
                     await updateDoc(doc(db, "rooms", id), { name, price, facilities, cover: coverUrl });
@@ -1235,13 +1222,17 @@
                 const fileFoto = document.getElementById('asetFoto').files[0];
                 const fileNota = document.getElementById('asetNota').files[0];
                 
-                // 1. Kompres
-                const base64Foto = fileFoto ? await compressImageToBase64(fileFoto) : dummyImg;
-                const base64Nota = fileNota ? await compressImageToBase64(fileNota) : dummyImg;
-                
-                // 2. Upload ke Storage
-                const imageUrl = await uploadImageToStorage(base64Foto, 'aset_items');
-                const receiptUrl = await uploadImageToStorage(base64Nota, 'aset_receipts');
+                // SISTEM BARU: Kompresi & Upload Paralel (Berjalan Bersamaan)
+                const [imageUrl, receiptUrl] = await Promise.all([
+                    (async () => {
+                        const b64 = fileFoto ? await compressImageToBase64(fileFoto) : dummyImg;
+                        return uploadImageToStorage(b64, 'aset_items');
+                    })(),
+                    (async () => {
+                        const b64 = fileNota ? await compressImageToBase64(fileNota) : dummyImg;
+                        return uploadImageToStorage(b64, 'aset_receipts');
+                    })()
+                ]);
 
                 const assetRef = await addDoc(collection(db, "assets"), { 
                     name, price, type, roomId, date, condition, image: imageUrl, receiptImage: receiptUrl, status: 'Normal', history: [], timestamp: Date.now() 
@@ -1390,17 +1381,18 @@
                 const fileKtp = document.getElementById('sewaKtp').files[0];
                 const fileBukti = document.getElementById('sewaBukti').files[0];
                 
-                // 1. Kompres
-                let base64Ktp = fileKtp ? await compressImageToBase64(fileKtp) : dummyImg;
-                const base64Bukti = fileBukti ? await compressImageToBase64(fileBukti) : dummyImg;
-
-                if (mode === 'perpanjang' && !fileKtp && room.tenantKtp) {
-                    base64Ktp = room.tenantKtp; // Jika perpanjang pakai data lama (URL yg sudah ada)
-                }
-                
-                // 2. Upload
-                const ktpUrl = await uploadImageToStorage(base64Ktp, 'sewa_ktp');
-                const buktiUrl = await uploadImageToStorage(base64Bukti, 'sewa_bukti');
+                // SISTEM BARU: Kompresi & Upload Paralel (Berjalan Bersamaan)
+                const [ktpUrl, buktiUrl] = await Promise.all([
+                    (async () => {
+                        if (mode === 'perpanjang' && !fileKtp && room.tenantKtp) return room.tenantKtp;
+                        const b64 = fileKtp ? await compressImageToBase64(fileKtp) : dummyImg;
+                        return uploadImageToStorage(b64, 'sewa_ktp');
+                    })(),
+                    (async () => {
+                        const b64 = fileBukti ? await compressImageToBase64(fileBukti) : dummyImg;
+                        return uploadImageToStorage(b64, 'sewa_bukti');
+                    })()
+                ]);
 
                 const amount = room.price * durasi;
 
