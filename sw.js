@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kontrakan-cache-v4';
+const CACHE_NAME = 'kontrakan-cache-v5';
 const urlsToCache = [
   './',
   './index.html',
