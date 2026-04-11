@@ -496,9 +496,15 @@
                         <select id="sewaDurasi" required onchange="window.kalkulasiSewa()" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm bg-white"></select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Bukti Transfer/KTP (Opsional)</label>
-                    <input type="file" id="sewaBukti" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-indigo-50 file:text-indigo-700">
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-600 mb-1">Foto KTP (Opsional)</label>
+                        <input type="file" id="sewaKtp" accept="image/*" class="w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-medium text-slate-600 mb-1">Bukti Transfer (Opsional)</label>
+                        <input type="file" id="sewaBukti" accept="image/*" class="w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700">
+                    </div>
                 </div>
                 <div class="bg-green-50 p-4 rounded-lg border border-green-100 mt-2">
                     <p class="text-xs text-green-600 font-semibold mb-1">Total Harus Dibayar:</p>
@@ -744,8 +750,11 @@
                         <div class="bg-slate-50 p-3 rounded-lg mb-3 mt-2 border border-slate-100">
                             <p class="text-xs text-slate-500 mb-1">Penyewa Aktif:</p>
                             <p class="font-semibold text-slate-700 flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> ${room.tenantName}</p>
-                            ${room.tenantPhone ? `<a href="https://wa.me/${room.tenantPhone}" target="_blank" class="text-xs text-green-600 mt-1 flex items-center gap-1 hover:underline"><i data-lucide="phone" class="w-3 h-3"></i> Hubungi WA</a>` : ''}
-                            <p class="text-xs text-red-500 mt-1 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Jatuh Tempo: ${formatTgl(room.endDate)}</p>
+                            <div class="flex gap-2 mt-1">
+                                ${room.tenantPhone ? `<a href="https://wa.me/${room.tenantPhone}" target="_blank" class="text-[10px] bg-green-50 text-green-600 px-2 py-1 rounded flex items-center gap-1 hover:bg-green-100 transition"><i data-lucide="phone" class="w-3 h-3"></i> Hubungi WA</a>` : ''}
+                                ${room.tenantKtp && room.tenantKtp !== dummyImg ? `<button onclick="window.openLightbox('${room.tenantKtp}')" class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded flex items-center gap-1 hover:bg-indigo-100 transition"><i data-lucide="credit-card" class="w-3 h-3"></i> Lihat KTP</button>` : ''}
+                            </div>
+                            <p class="text-xs text-red-500 mt-1.5 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Jatuh Tempo: ${formatTgl(room.endDate)}</p>
                         </div>
                         ` : '<div class="h-4"></div>'}
 
@@ -784,7 +793,10 @@
                     <td class="px-5 py-3 font-bold text-slate-700">${room.name}</td>
                     <td class="px-5 py-3">
                         <div class="font-medium text-indigo-700">${room.tenantName}</div>
-                        ${room.tenantPhone ? `<a href="https://wa.me/${room.tenantPhone}" target="_blank" class="text-[10px] text-green-600 flex items-center gap-1 hover:underline mt-0.5"><i data-lucide="phone" class="w-3 h-3"></i> ${room.tenantPhone}</a>` : ''}
+                        <div class="flex items-center gap-2 mt-0.5">
+                            ${room.tenantPhone ? `<a href="https://wa.me/${room.tenantPhone}" target="_blank" class="text-[10px] text-green-600 flex items-center gap-1 hover:underline"><i data-lucide="phone" class="w-3 h-3"></i> ${room.tenantPhone}</a>` : ''}
+                            ${room.tenantKtp && room.tenantKtp !== dummyImg ? `<button onclick="window.openLightbox('${room.tenantKtp}')" class="text-[10px] text-indigo-600 flex items-center gap-1 hover:underline"><i data-lucide="credit-card" class="w-3 h-3"></i> KTP</button>` : ''}
+                        </div>
                     </td>
                     <td class="px-5 py-3 text-sm">${formatTgl(room.endDate)}</td>
                     <td class="px-5 py-3"><span class="${room.status === 'Jatuh Tempo' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'} px-2 py-1 rounded text-xs font-semibold">${room.status}</span></td>
@@ -803,7 +815,10 @@
                     <td class="px-5 py-3 text-slate-700">${trx.desc}</td>
                     <td class="px-5 py-3 text-green-600 font-bold">+${formatRp(trx.amount)}</td>
                     <td class="px-5 py-3 text-center">
-                        ${trx.image && trx.image !== dummyImg ? `<button onclick="window.openLightbox('${trx.image}')" title="Lihat Bukti" class="text-indigo-500 hover:text-indigo-700 p-1.5 bg-indigo-50 hover:bg-indigo-100 rounded transition"><i data-lucide="file-text" class="w-4 h-4"></i></button>` : '-'}
+                        <div class="flex justify-center gap-1">
+                            ${trx.image && trx.image !== dummyImg ? `<button onclick="window.openLightbox('${trx.image}')" title="Bukti Transfer" class="text-green-600 hover:text-green-800 p-1.5 bg-green-50 hover:bg-green-100 rounded transition"><i data-lucide="receipt" class="w-4 h-4"></i></button>` : '<span class="text-slate-300">-</span>'}
+                            ${trx.ktpImage && trx.ktpImage !== dummyImg ? `<button onclick="window.openLightbox('${trx.ktpImage}')" title="Foto KTP" class="text-indigo-600 hover:text-indigo-800 p-1.5 bg-indigo-50 hover:bg-indigo-100 rounded transition"><i data-lucide="credit-card" class="w-4 h-4"></i></button>` : ''}
+                        </div>
                     </td>
                     <td class="px-5 py-3 text-center">
                         <button onclick="window.confirmDeleteTransaction('${trx.id}')" title="Hapus Riwayat" class="text-red-400 hover:text-red-600 p-1.5 bg-red-50 hover:bg-red-100 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -1334,11 +1349,19 @@
                 if(!tglMulai) throw new Error("Tanggal mulai belum dipilih.");
                 if(durasi < 1) throw new Error("Durasi tidak valid.");
 
-                const file = document.getElementById('sewaBukti').files[0];
-                const image = file ? await getBase64Compressed(file) : dummyImg;
-
                 const room = window.state.rooms.find(r => String(r.id) === String(roomId));
                 if(!room) throw new Error("Data kamar tidak ditemukan.");
+
+                const fileKtp = document.getElementById('sewaKtp').files[0];
+                const fileBukti = document.getElementById('sewaBukti').files[0];
+                
+                let ktpImage = fileKtp ? await getBase64Compressed(fileKtp) : dummyImg;
+                const buktiImage = fileBukti ? await getBase64Compressed(fileBukti) : dummyImg;
+
+                // Jika perpanjang dan tidak upload KTP baru, gunakan KTP lama
+                if (mode === 'perpanjang' && !fileKtp && room.tenantKtp) {
+                    ktpImage = room.tenantKtp;
+                }
                 
                 const amount = room.price * durasi;
 
@@ -1348,7 +1371,7 @@
                 const tglEnd = endDateObj.toISOString().split('T')[0];
 
                 await updateDoc(doc(db, "rooms", roomId), {
-                    status: 'Terisi', tenantName: tenantName, tenantPhone: tenantPhone, startDate: tglMulai, endDate: tglEnd
+                    status: 'Terisi', tenantName: tenantName, tenantPhone: tenantPhone, startDate: tglMulai, endDate: tglEnd, tenantKtp: ktpImage
                 });
 
                 // Tanggal transaksi pembayaran selalu otomatis direkam HARI INI
@@ -1358,7 +1381,7 @@
                 const desc = mode === 'baru' ? `Sewa Baru ${room.name} (${tenantName}) : ${durasiTeks}` : `Perpanjang ${room.name} (${tenantName}) : ${durasiTeks}`;
                 
                 await addDoc(collection(db, "transactions"), {
-                    type: 'Pemasukan', category: 'Sewa', amount, date: todayDate, desc, image, timestamp: Date.now()
+                    type: 'Pemasukan', category: 'Sewa', amount, date: todayDate, desc, image: buktiImage, ktpImage: ktpImage, timestamp: Date.now()
                 });
 
                 e.target.reset();
@@ -1372,7 +1395,7 @@
 
         window.confirmCheckout = (roomId) => {
             window.confirmAction("Kosongkan Kamar", "Penyewa akan dikeluarkan. Lanjutkan?", async () => {
-                await updateDoc(doc(db, "rooms", roomId), { status: 'Kosong', tenantName: '', tenantPhone: '', startDate: '', endDate: '' });
+                await updateDoc(doc(db, "rooms", roomId), { status: 'Kosong', tenantName: '', tenantPhone: '', tenantKtp: '', startDate: '', endDate: '' });
             });
         };
 
