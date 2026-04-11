@@ -64,7 +64,7 @@
                     <input type="password" id="password" placeholder="Password" required
                         class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
                 </div>
-                <div id="loginError" class="text-red-500 text-sm hidden">Username atau password salah!</div>
+                <div id="loginError" class="text-red-500 text-xs hidden text-left bg-red-50 p-2 rounded border border-red-100">Username atau password salah!</div>
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold p-3 rounded-xl shadow-md transition active:scale-95">
                     Masuk
                 </button>
@@ -498,6 +498,20 @@
         </div>
     </div>
 
+    <div id="modalConfirm" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-lg font-bold text-slate-800 mb-2" id="confirmTitle">Konfirmasi</h2>
+            <p class="text-slate-500 text-sm mb-6" id="confirmText">Apakah Anda yakin?</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal('modalConfirm')" class="w-1/2 p-2.5 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200">Batal</button>
+                <button id="btnConfirmAction" class="w-1/2 p-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalLightbox" class="fixed inset-0 bg-black/90 z-[70] hidden flex flex-col items-center justify-center p-4" onclick="closeModal('modalLightbox')">
         <button class="absolute top-4 right-4 text-white p-2 bg-white/10 rounded-full hover:bg-white/20 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
         <img id="lightboxImage" src="" alt="Preview" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain">
@@ -524,13 +538,14 @@
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // KONFIGURASI BARU ANDA (aco-app-11a2d)
         const firebaseConfig = {
-            apiKey: "AIzaSyCdJfCZwtqOh5TxEaOpjnAR2eMCP5HGm0w",
-            authDomain: "aco-app-794b2.firebaseapp.com",
-            projectId: "aco-app-794b2",
-            storageBucket: "aco-app-794b2.firebasestorage.app",
-            messagingSenderId: "146927559465",
-            appId: "1:146927559465:web:2a1909dc95c6d1d2904d38"
+            apiKey: "AIzaSyBNWxxQIhfMforEazNKzsqOAXPb8FObO1I",
+            authDomain: "aco-app-11a2d.firebaseapp.com",
+            projectId: "aco-app-11a2d",
+            storageBucket: "aco-app-11a2d.firebasestorage.app",
+            messagingSenderId: "695258013064",
+            appId: "1:695258013064:web:ed1052380f0673b669ee3d"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -541,7 +556,7 @@
         
         window.state = { rooms: [], assets: [], transactions: [] };
         window.tempFasilitas = [];
-        window.activeAssetId = null; // Menyimpan ID aset yang sedang dibuka di modal detail
+        window.activeAssetId = null;
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
         const formatTgl = (tgl) => {
@@ -610,7 +625,8 @@
                     document.getElementById('appScreen').classList.remove('hidden');
                     window.initApp();
                 } catch (error) {
-                    document.getElementById('loginError').innerText = "Gagal terhubung ke database.";
+                    // Fitur menampilkan pesan error asli untuk mempermudah deteksi masalah
+                    document.getElementById('loginError').innerText = "Gagal. Pesan Error Firebase: " + error.message;
                     document.getElementById('loginError').classList.remove('hidden');
                 }
                 btn.innerText = "Masuk";
@@ -681,7 +697,6 @@
         };
 
         const renderUnitAset = () => {
-            // RENDERING KAMAR (Foto 1:1 dan Tombol Fasilitas)
             const htmlKamar = window.state.rooms.map(room => {
                 let badgeClass = "bg-slate-100 text-slate-600";
                 if(room.status === 'Terisi') badgeClass = "bg-green-100 text-green-700";
@@ -689,7 +704,6 @@
 
                 const fasLabels = room.facilities.map(f => {
                     const fname = typeof f === 'string' ? f : f.name;
-                    // Deteksi foto barang. Jika tidak ada, pakai foto dari state (atau cegah buka)
                     const imgToOpen = typeof f === 'string' ? dummyImg : (f.itemImage || dummyImg);
                     return `<button onclick="window.openLightbox('${imgToOpen}')" class="bg-indigo-50 text-indigo-600 text-[10px] px-2 py-1 rounded border border-indigo-100 hover:bg-indigo-100 cursor-pointer transition flex items-center gap-1 shadow-sm"><i data-lucide="image" class="w-3 h-3"></i> ${fname}</button>`;
                 }).join('');
@@ -724,7 +738,6 @@
             }).join('');
             document.getElementById('gridKamar').innerHTML = htmlKamar || `<div class="col-span-full text-center py-10 text-slate-400">Belum ada data kamar</div>`;
 
-            // RENDERING ASET TABEL
             const htmlAset = window.state.assets.map(aset => {
                 const tujuan = aset.type === 'Umum' ? 'Umum' : `Kamar: ${window.state.rooms.find(r=>r.id === aset.roomId)?.name || '?'}`;
                 const kondisiText = aset.condition || 'Baru'; 
@@ -743,7 +756,7 @@
             document.getElementById('tableAset').innerHTML = htmlAset || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Belum ada data aset</td></tr>`;
         };
 
-        const renderSewa = () => { /* Logic tidak berubah */
+        const renderSewa = () => { 
             const terisi = window.state.rooms.filter(r => r.status !== 'Kosong');
             const htmlAktif = terisi.map(room => `
                 <tr class="hover:bg-slate-50">
@@ -791,14 +804,13 @@
         window.openAssetDetail = (id) => {
             const asset = window.state.assets.find(a => a.id === id);
             if(!asset) return;
-            window.activeAssetId = id; // Set active ID
+            window.activeAssetId = id;
 
             document.getElementById('detAssetName').innerText = asset.name;
             const tujuan = asset.type === 'Umum' ? 'Umum' : `Kamar: ${window.state.rooms.find(r=>r.id === asset.roomId)?.name || 'Dihapus'}`;
             document.getElementById('detAssetType').innerText = `${tujuan} - ${formatTgl(asset.date)}`;
             document.getElementById('detAssetPrice').innerText = formatRp(asset.price);
 
-            // Tampilkan Status
             const statusBadge = document.getElementById('detAssetStatusBadge');
             const assetStatus = asset.status || 'Normal';
             statusBadge.innerText = assetStatus;
@@ -810,7 +822,6 @@
                 statusBadge.className = "bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-bold border border-green-200";
             }
 
-            // Tampilkan Catatan (Jika ada)
             const boxNotes = document.getElementById('boxAssetNotes');
             if((assetStatus === 'Rusak' || assetStatus === 'Diservis') && asset.statusNote) {
                 document.getElementById('detAssetNotes').innerText = asset.statusNote;
@@ -819,11 +830,9 @@
                 boxNotes.classList.add('hidden');
             }
 
-            // Tombol Foto
             document.getElementById('btnLihatFotoProduk').onclick = () => window.openLightbox(asset.image);
             document.getElementById('btnLihatFotoNota').onclick = () => window.openLightbox(asset.receiptImage);
 
-            // History
             const histBox = document.getElementById('detAssetHistory');
             if(asset.history && asset.history.length > 0) {
                 histBox.innerHTML = asset.history.slice().reverse().map(h => `<p class="border-b border-slate-50 pb-1 mb-1"><b>${h.date}</b>: ${h.log}</p>`).join('');
@@ -862,17 +871,14 @@
                     const newLog = { date: getTanggalJamString(), log: changes.join(', ') };
                     const newHistory = asset.history ? [...asset.history, newLog] : [newLog];
 
-                    // 1. UPDATE ASSET
                     await updateDoc(doc(db, "assets", asset.id), {
                         name: newName, price: newPrice, date: newDate, history: newHistory
                     });
 
-                    // 2. SINKRONISASI KE KAMAR (Jika ada)
                     if(asset.type === 'Kamar') {
                         const roomUpdate = window.state.rooms.find(r => r.id === asset.roomId);
                         if(roomUpdate) {
                             const updatedFacs = roomUpdate.facilities.map(f => {
-                                // Pencocokan via nama lama atau ID
                                 if(f.assetId === asset.id || f.name === asset.name) {
                                     return { ...f, name: newName }; 
                                 }
@@ -882,28 +888,22 @@
                         }
                     }
 
-                    // 3. SINKRONISASI KE TRANSAKSI PENGELUARAN
                     const q = query(collection(db, "transactions"), where("category", "==", "Aset"));
                     const qs = await getDocs(q);
                     qs.forEach(async (d) => {
                         const tr = d.data();
-                        // Cocokkan transaksi dengan data aset lama ini
                         if(tr.assetId === asset.id || (tr.amount === asset.price && tr.desc.includes(asset.name))) {
-                             let newDesc = tr.desc.replace(asset.name, newName); // Update teks desc
+                             let newDesc = tr.desc.replace(asset.name, newName);
                              await updateDoc(doc(db, "transactions", d.id), { amount: newPrice, date: newDate, desc: newDesc });
                         }
                     });
 
-                    // Refresh Modal Detail
                     asset.name = newName; asset.price = newPrice; asset.date = newDate; asset.history = newHistory;
                     window.openAssetDetail(asset.id);
                 }
                 
                 window.closeModal('modalEditAsset');
-            } catch(err) {
-                console.error(err);
-                alert("Gagal mengedit data.");
-            }
+            } catch(err) { alert("Gagal mengedit data."); }
             btn.innerText = "Simpan Edit"; btn.disabled = false;
         };
 
@@ -938,7 +938,7 @@
                 asset.status = newStatus; asset.statusNote = newNote; asset.history = newHistory;
                 window.openAssetDetail(asset.id);
                 window.closeModal('modalStatusAsset');
-            } catch(err) { console.error(err); alert("Gagal update status."); }
+            } catch(err) { alert("Gagal update status."); }
             btn.innerText = "Simpan Status"; btn.disabled = false;
         };
 
@@ -949,7 +949,6 @@
                     const id = window.activeAssetId;
                     const asset = window.state.assets.find(a => a.id === id);
                     
-                    // 1. Hapus dari Fasilitas Kamar
                     if(asset.roomId) {
                         const room = window.state.rooms.find(r => r.id === asset.roomId);
                         if(room) {
@@ -958,7 +957,6 @@
                         }
                     }
 
-                    // 2. Hapus Transaksi Pengeluaran
                     const q = query(collection(db, "transactions"), where("category", "==", "Aset"));
                     const qs = await getDocs(q);
                     qs.forEach(async (d) => {
@@ -968,15 +966,10 @@
                         }
                     });
 
-                    // 3. Hapus Aset Database
                     await deleteDoc(doc(db, "assets", id));
-
                     window.closeModal('modalAssetDetail');
                     alert("Data berhasil dihapus!");
-                } catch (err) {
-                    console.error(err);
-                    alert("Gagal menghapus data.");
-                }
+                } catch (err) { alert("Gagal menghapus data."); }
             } else {
                 if(userInput !== null) alert("Teks tidak sesuai. Penghapusan dibatalkan.");
             }
@@ -1133,18 +1126,15 @@
                 const type = document.getElementById('asetKeperluan').value;
                 const roomId = type === 'Kamar' ? document.getElementById('asetKamarId').value : null;
                 
-                // Ambil 2 Foto Berbeda
                 const fileFoto = document.getElementById('asetFoto').files[0];
                 const fileNota = document.getElementById('asetNota').files[0];
                 const image = fileFoto ? await getBase64Compressed(fileFoto) : dummyImg;
                 const receiptImage = fileNota ? await getBase64Compressed(fileNota) : dummyImg;
 
-                // 1. Simpan ke Aset dengan ID ref
                 const assetRef = await addDoc(collection(db, "assets"), { 
                     name, price, type, roomId, date, condition, image, receiptImage, status: 'Normal', history: [], timestamp: Date.now() 
                 });
 
-                // 2. Transaksi & Kamar
                 let desc = `Beli ${name} (${condition}) - ${type}`;
                 if(type === 'Kamar') {
                     const room = window.state.rooms.find(r=>r.id === roomId);
@@ -1154,20 +1144,16 @@
                     await updateDoc(doc(db, "rooms", roomId), { facilities: [...room.facilities, newFacility] });
                 }
                 
-                // Simpan transaksi sambil membawa assetId
                 await addDoc(collection(db, "transactions"), { type: 'Pengeluaran', category: 'Aset', assetId: assetRef.id, amount: price, date, desc, image: receiptImage, timestamp: Date.now() });
 
                 e.target.reset();
                 window.closeModal('modalAset');
                 window.togglePilihKamar();
-            } catch (err) {
-                console.error("Error save aset", err);
-                alert("Gagal simpan aset.");
-            }
+            } catch (err) { alert("Gagal simpan aset."); }
             btn.innerText = "Simpan Aset"; btn.disabled = false;
         };
 
-        // --- SEWA LOGIC & CONFIRM (Tetap sama) ---
+        // --- SEWA LOGIC & CONFIRM ---
         window.openInputSewa = () => { 
             document.getElementById('titleModalSewa').innerText = "Input Sewa Baru";
             document.getElementById('sewaMode').value = "baru";
