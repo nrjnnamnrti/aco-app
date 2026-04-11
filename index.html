@@ -54,7 +54,7 @@
             </div>
             <div class="flex items-center justify-center gap-2 mb-1">
                 <h1 class="text-2xl font-bold text-slate-800">ACO</h1>
-                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">v2.12</span>
+                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">v2.13</span>
             </div>
             <p class="text-slate-500 text-sm mb-6">Silakan login untuk mengelola properti</p>
             
@@ -179,10 +179,11 @@
 
             <div id="view-sewa" class="tab-content space-y-8">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-5 border-b border-slate-100">
+                    <div class="p-5 border-b border-slate-100 flex justify-between items-center flex-wrap gap-3">
                         <h2 class="font-bold text-slate-800 flex items-center gap-2">
                             <i data-lucide="user-check" class="w-5 h-5 text-indigo-500"></i> Status Sewa Aktif
                         </h2>
+                        <button onclick="openInputSewa()" title="Input Sewa Baru" class="bg-indigo-600 text-white hover:bg-indigo-700 p-2.5 rounded-lg shadow-sm transition flex items-center gap-1 text-xs"><i data-lucide="plus" class="w-4 h-4"></i> Input Sewa</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-slate-600">
@@ -192,7 +193,7 @@
                                     <th class="px-5 py-3">Penyewa</th>
                                     <th class="px-5 py-3">Berakhir Pada</th>
                                     <th class="px-5 py-3">Status</th>
-                                    <th class="px-5 py-3 text-right">Aksi</th>
+                                    <th class="px-5 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="tableSewaAktif" class="divide-y divide-slate-100"></tbody>
@@ -203,18 +204,17 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-5 border-b border-slate-100 flex justify-between items-center flex-wrap gap-3">
                         <h2 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i data-lucide="history" class="w-5 h-5 text-indigo-500"></i> Riwayat Pembayaran
+                            <i data-lucide="history" class="w-5 h-5 text-indigo-500"></i> Riwayat Penyewa Keluar
                         </h2>
-                        <button onclick="openInputSewa()" title="Input Sewa Baru" class="bg-indigo-600 text-white hover:bg-indigo-700 p-2.5 rounded-lg shadow-sm transition"><i data-lucide="plus" class="w-5 h-5"></i></button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-slate-600">
                             <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
                                 <tr>
-                                    <th class="px-5 py-3">Tanggal</th>
-                                    <th class="px-5 py-3">Keterangan</th>
-                                    <th class="px-5 py-3">Nominal</th>
-                                    <th class="px-5 py-3 text-center">Bukti</th>
+                                    <th class="px-5 py-3">Tgl Keluar</th>
+                                    <th class="px-5 py-3">Kamar</th>
+                                    <th class="px-5 py-3">Nama Penyewa</th>
+                                    <th class="px-5 py-3 text-center">KTP</th>
                                     <th class="px-5 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -249,6 +249,83 @@
         </main>
     </div>
 
+    <!-- Modal Detail Sewa -->
+    <div id="modalSewaDetail" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3 mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800" id="detSewaRoomName">Nama Kamar</h2>
+                    <p class="text-xs text-green-600 font-semibold mt-1">Status: Aktif</p>
+                </div>
+                <button onclick="closeModal('modalSewaDetail')" class="text-slate-400 hover:text-slate-600 transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <p class="text-xs text-slate-500 mb-1">Nama Penyewa</p>
+                    <p class="font-bold text-slate-800 text-lg flex items-center gap-2" id="detSewaTenantName">-</p>
+                    <a href="#" id="detSewaPhoneLink" target="_blank" class="text-xs text-green-600 mt-1 inline-flex items-center gap-1 hover:underline"><i data-lucide="phone" class="w-3 h-3"></i> <span id="detSewaPhoneText">Hubungi WA</span></a>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                        <p class="text-[10px] text-slate-500 mb-1">Tgl Masuk</p>
+                        <p class="font-semibold text-slate-700 text-sm" id="detSewaStartDate">-</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-red-100 shadow-sm">
+                        <p class="text-[10px] text-red-500 mb-1">Jatuh Tempo</p>
+                        <p class="font-semibold text-red-700 text-sm" id="detSewaEndDate">-</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btnDetSewaKtp" class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 p-2 rounded-lg text-xs font-semibold flex justify-center gap-1 items-center transition shadow-sm border border-indigo-100"><i data-lucide="credit-card" class="w-4 h-4"></i> Lihat KTP</button>
+                    <button id="btnDetSewaBukti" class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 p-2 rounded-lg text-xs font-semibold flex justify-center gap-1 items-center transition shadow-sm border border-indigo-100"><i data-lucide="receipt" class="w-4 h-4"></i> Bukti Bayar Terakhir</button>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2 pt-4 border-t border-slate-100">
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="window.openEditSewa()" class="border border-slate-200 text-slate-600 p-2.5 rounded-lg text-xs font-semibold hover:bg-slate-50 transition flex justify-center items-center gap-1"><i data-lucide="edit" class="w-4 h-4"></i> Edit Data</button>
+                    <button onclick="window.openPerpanjangFromDetail()" class="bg-indigo-600 text-white p-2.5 rounded-lg text-xs font-semibold hover:bg-indigo-700 transition shadow-md flex justify-center items-center gap-1"><i data-lucide="calendar-plus" class="w-4 h-4"></i> Perpanjang</button>
+                </div>
+                <button onclick="window.confirmCheckoutFromDetail()" class="w-full bg-red-50 text-red-600 border border-red-100 p-2.5 rounded-lg text-sm font-semibold hover:bg-red-100 transition mt-1 flex justify-center items-center gap-2"><i data-lucide="door-open" class="w-4 h-4"></i> Keluarkan Penyewa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Data Penyewa -->
+    <div id="modalEditSewa" class="fixed inset-0 bg-slate-900/60 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-4">Edit Data Penyewa</h2>
+            <form id="formEditSewa" onsubmit="saveEditSewa(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Nama Penyewa</label>
+                    <input type="text" id="editSewaName" required class="w-full p-2 border border-slate-200 rounded outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">No WhatsApp</label>
+                    <input type="tel" id="editSewaPhone" placeholder="08123..." class="w-full p-2 border border-slate-200 rounded outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Tgl Masuk</label>
+                        <input type="date" id="editSewaStartDate" required class="w-full p-2 border border-slate-200 rounded outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Jatuh Tempo</label>
+                        <input type="date" id="editSewaEndDate" required class="w-full p-2 border border-slate-200 rounded outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modalEditSewa')" class="w-1/2 p-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-200">Batal</button>
+                    <button type="submit" id="btnSaveEditSewa" class="w-1/2 p-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">Simpan Edit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Detail Aset -->
     <div id="modalAssetDetail" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-start border-b border-slate-100 pb-3 mb-4">
@@ -568,9 +645,10 @@
 
         const dummyImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%2364748b'%3ENo Image%3C/text%3E%3C/svg%3E";
         
-        window.state = { rooms: [], assets: [], transactions: [] };
+        window.state = { rooms: [], assets: [], transactions: [], tenantHistory: [] };
         window.tempFasilitas = [];
         window.activeAssetId = null;
+        window.activeRoomIdForSewa = null;
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
         const formatTgl = (tgl) => {
@@ -582,7 +660,6 @@
             return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()} ${dt.getHours()}:${dt.getMinutes()}`;
         }
         
-        // FUNGSI KOMPRESI TEKS (Menggunakan URL.createObjectURL - Anti Gagal Baca Galeri Chrome)
         const compressImageToBase64 = (file) => new Promise((resolve, reject) => {
             if(!file) return resolve(dummyImg);
             if (!file.type.match('image.*')) return reject(new Error("Bukan file gambar."));
@@ -599,7 +676,7 @@
                 URL.revokeObjectURL(imgUrl);
                 
                 const canvas = document.createElement('canvas');
-                const MAX_DIMENSION = 800; // Ukuran diperkecil agar file ringan (100kb)
+                const MAX_DIMENSION = 800;
                 let width = img.width;
                 let height = img.height;
                 
@@ -758,7 +835,6 @@
                             <p class="font-semibold text-slate-700 flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> ${room.tenantName}</p>
                             <div class="flex gap-2 mt-1">
                                 ${room.tenantPhone ? `<a href="https://wa.me/${room.tenantPhone}" target="_blank" class="text-[10px] bg-green-50 text-green-600 px-2 py-1 rounded flex items-center gap-1 hover:bg-green-100 transition"><i data-lucide="phone" class="w-3 h-3"></i> Hubungi WA</a>` : ''}
-                                ${room.tenantKtp && room.tenantKtp !== dummyImg ? `<button onclick="window.openLightbox('${room.tenantKtp}')" class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded flex items-center gap-1 hover:bg-indigo-100 transition"><i data-lucide="credit-card" class="w-3 h-3"></i> Lihat KTP</button>` : ''}
                             </div>
                             <p class="text-xs text-red-500 mt-1.5 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Jatuh Tempo: ${formatTgl(room.endDate)}</p>
                         </div>
@@ -794,43 +870,39 @@
 
         const renderSewa = () => { 
             const terisi = window.state.rooms.filter(r => r.status !== 'Kosong');
+            
+            // PERBARUAN: Tombol Detail pada Status Sewa Aktif
             const htmlAktif = terisi.map(room => `
                 <tr class="hover:bg-slate-50">
                     <td class="px-5 py-3 font-bold text-slate-700">${room.name}</td>
-                    <td class="px-5 py-3">
-                        <div class="font-medium text-indigo-700">${room.tenantName}</div>
-                        <div class="flex items-center gap-2 mt-0.5">
-                            ${room.tenantPhone ? `<a href="https://wa.me/${room.tenantPhone}" target="_blank" class="text-[10px] text-green-600 flex items-center gap-1 hover:underline"><i data-lucide="phone" class="w-3 h-3"></i> ${room.tenantPhone}</a>` : ''}
-                            ${room.tenantKtp && room.tenantKtp !== dummyImg ? `<button onclick="window.openLightbox('${room.tenantKtp}')" class="text-[10px] text-indigo-600 flex items-center gap-1 hover:underline"><i data-lucide="credit-card" class="w-3 h-3"></i> KTP</button>` : ''}
-                        </div>
-                    </td>
+                    <td class="px-5 py-3 font-medium text-indigo-700">${room.tenantName}</td>
                     <td class="px-5 py-3 text-sm">${formatTgl(room.endDate)}</td>
                     <td class="px-5 py-3"><span class="${room.status === 'Jatuh Tempo' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'} px-2 py-1 rounded text-xs font-semibold">${room.status}</span></td>
-                    <td class="px-5 py-3 text-right space-x-1 whitespace-nowrap">
-                        <button onclick="window.openPerpanjangSewa('${room.id}')" title="Perpanjang Sewa" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 p-1.5 rounded transition"><i data-lucide="calendar-plus" class="w-4 h-4"></i></button>
-                        <button onclick="window.confirmCheckout('${room.id}')" title="Kosongkan Kamar" class="bg-red-100 text-red-700 hover:bg-red-200 p-1.5 rounded transition"><i data-lucide="door-open" class="w-4 h-4"></i></button>
+                    <td class="px-5 py-3 text-center">
+                        <button onclick="window.openSewaDetail('${room.id}')" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 mx-auto"><i data-lucide="info" class="w-3 h-3"></i> Detail</button>
                     </td>
                 </tr>
             `).join('');
             document.getElementById('tableSewaAktif').innerHTML = htmlAktif || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Semua kamar kosong</td></tr>`;
 
-            const htmlRiwayat = window.state.transactions.filter(t => t.type === 'Pemasukan').map(trx => `
+            // PERBARUAN: Mengganti Riwayat Pembayaran menjadi Riwayat Penyewa Keluar
+            const htmlRiwayatKeluar = window.state.tenantHistory.map(hist => `
                 <tr class="hover:bg-slate-50">
-                    <td class="px-5 py-3 whitespace-nowrap">${formatTgl(trx.date)}</td>
-                    <td class="px-5 py-3 text-slate-700">${trx.desc}</td>
-                    <td class="px-5 py-3 text-green-600 font-bold">+${formatRp(trx.amount)}</td>
-                    <td class="px-5 py-3 text-center">
-                        <div class="flex justify-center gap-1">
-                            ${trx.image && trx.image !== dummyImg ? `<button onclick="window.openLightbox('${trx.image}')" title="Bukti Transfer" class="text-green-600 hover:text-green-800 p-1.5 bg-green-50 hover:bg-green-100 rounded transition"><i data-lucide="receipt" class="w-4 h-4"></i></button>` : '<span class="text-slate-300">-</span>'}
-                            ${trx.ktpImage && trx.ktpImage !== dummyImg ? `<button onclick="window.openLightbox('${trx.ktpImage}')" title="Foto KTP" class="text-indigo-600 hover:text-indigo-800 p-1.5 bg-indigo-50 hover:bg-indigo-100 rounded transition"><i data-lucide="credit-card" class="w-4 h-4"></i></button>` : ''}
-                        </div>
+                    <td class="px-5 py-3 whitespace-nowrap text-sm">${formatTgl(hist.checkoutDate)}</td>
+                    <td class="px-5 py-3 font-bold text-slate-700">${hist.roomName}</td>
+                    <td class="px-5 py-3">
+                        <div class="font-medium text-slate-800">${hist.tenantName}</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">Masuk: ${formatTgl(hist.startDate)}</div>
                     </td>
                     <td class="px-5 py-3 text-center">
-                        <button onclick="window.confirmDeleteTransaction('${trx.id}')" title="Hapus Riwayat" class="text-red-400 hover:text-red-600 p-1.5 bg-red-50 hover:bg-red-100 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        ${hist.tenantKtp && hist.tenantKtp !== dummyImg ? `<button onclick="window.openLightbox('${hist.tenantKtp}')" title="Foto KTP" class="text-indigo-600 hover:text-indigo-800 p-1.5 bg-indigo-50 hover:bg-indigo-100 rounded transition"><i data-lucide="credit-card" class="w-4 h-4"></i></button>` : '-'}
+                    </td>
+                    <td class="px-5 py-3 text-center">
+                        <button onclick="window.confirmDeleteHistory('${hist.id}')" title="Hapus Riwayat" class="text-red-400 hover:text-red-600 p-1.5 bg-red-50 hover:bg-red-100 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 </tr>
             `).join('');
-            document.getElementById('tableRiwayatSewa').innerHTML = htmlRiwayat || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Belum ada riwayat sewa</td></tr>`;
+            document.getElementById('tableRiwayatSewa').innerHTML = htmlRiwayatKeluar || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Belum ada riwayat penyewa keluar</td></tr>`;
         };
 
         const renderPengaturan = () => {
@@ -848,17 +920,113 @@
             document.getElementById('tableMasterKamar').innerHTML = htmlKamar || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Data master kosong</td></tr>`;
         };
 
+        // --- SISTEM HAPUS RIWAYAT ---
         window.confirmDeleteTransaction = (id) => {
-            window.confirmAction("Hapus Riwayat", "Data ini akan dihapus dari riwayat transaksi dan kalkulasi Dashboard akan menyesuaikan. Lanjutkan?", async () => {
-                try {
-                    await deleteDoc(doc(db, "transactions", id));
-                } catch(err) {
-                    console.error(err);
-                    alert("Gagal menghapus data riwayat.");
-                }
+            window.confirmAction("Hapus Riwayat Transaksi", "Data ini akan dihapus dari riwayat transaksi dan kalkulasi Dashboard akan menyesuaikan. Lanjutkan?", async () => {
+                try { await deleteDoc(doc(db, "transactions", id)); } catch(err) { alert("Gagal menghapus data."); }
             });
         };
 
+        window.confirmDeleteHistory = (id) => {
+            window.confirmAction("Hapus Riwayat Penyewa", "Data historis penyewa ini akan dihapus permanen. Lanjutkan?", async () => {
+                try { await deleteDoc(doc(db, "tenant_history", id)); } catch(err) { alert("Gagal menghapus riwayat."); }
+            });
+        };
+
+        // --- SISTEM MODAL DETAIL SEWA BARU ---
+        window.openSewaDetail = (roomId) => {
+            const room = window.state.rooms.find(r => r.id === roomId);
+            if(!room) return;
+            window.activeRoomIdForSewa = roomId;
+
+            document.getElementById('detSewaRoomName').innerText = room.name;
+            document.getElementById('detSewaTenantName').innerText = room.tenantName;
+            
+            const phoneLink = document.getElementById('detSewaPhoneLink');
+            const phoneText = document.getElementById('detSewaPhoneText');
+            if(room.tenantPhone) {
+                phoneLink.href = `https://wa.me/${room.tenantPhone}`;
+                phoneText.innerText = room.tenantPhone;
+                phoneLink.classList.remove('hidden');
+            } else {
+                phoneLink.classList.add('hidden');
+            }
+
+            document.getElementById('detSewaStartDate').innerText = formatTgl(room.startDate);
+            document.getElementById('detSewaEndDate').innerText = formatTgl(room.endDate);
+
+            document.getElementById('btnDetSewaKtp').onclick = () => window.openLightbox(room.tenantKtp);
+            document.getElementById('btnDetSewaBukti').onclick = () => window.openLightbox(room.lastReceipt);
+
+            window.openModal('modalSewaDetail');
+        };
+
+        window.openPerpanjangFromDetail = () => {
+            window.closeModal('modalSewaDetail');
+            window.openPerpanjangSewa(window.activeRoomIdForSewa);
+        };
+
+        window.confirmCheckoutFromDetail = () => {
+            window.closeModal('modalSewaDetail');
+            window.confirmCheckout(window.activeRoomIdForSewa);
+        };
+
+        window.openEditSewa = () => {
+            const room = window.state.rooms.find(r => r.id === window.activeRoomIdForSewa);
+            document.getElementById('editSewaName').value = room.tenantName;
+            document.getElementById('editSewaPhone').value = room.tenantPhone || '';
+            document.getElementById('editSewaStartDate').value = room.startDate;
+            document.getElementById('editSewaEndDate').value = room.endDate;
+            window.openModal('modalEditSewa');
+        };
+
+        window.saveEditSewa = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveEditSewa');
+            btn.innerText = "Menyimpan..."; btn.disabled = true;
+
+            try {
+                const roomId = window.activeRoomIdForSewa;
+                const name = document.getElementById('editSewaName').value;
+                let phoneRaw = document.getElementById('editSewaPhone').value || "";
+                let phone = phoneRaw.replace(/\D/g, ''); 
+                if (phone.startsWith('0')) phone = '62' + phone.substring(1); 
+                
+                const start = document.getElementById('editSewaStartDate').value;
+                const end = document.getElementById('editSewaEndDate').value;
+
+                await updateDoc(doc(db, "rooms", roomId), {
+                    tenantName: name,
+                    tenantPhone: phone,
+                    startDate: start,
+                    endDate: end
+                });
+
+                window.closeModal('modalEditSewa');
+                // Auto update Modal Detail View
+                document.getElementById('detSewaTenantName').innerText = name;
+                document.getElementById('detSewaStartDate').innerText = formatTgl(start);
+                document.getElementById('detSewaEndDate').innerText = formatTgl(end);
+                
+                const phoneLink = document.getElementById('detSewaPhoneLink');
+                const phoneText = document.getElementById('detSewaPhoneText');
+                if(phone) {
+                    phoneLink.href = `https://wa.me/${phone}`;
+                    phoneText.innerText = phone;
+                    phoneLink.classList.remove('hidden');
+                } else {
+                    phoneLink.classList.add('hidden');
+                }
+
+                window.openSewaDetail(roomId); // Buka kembali papan detail
+            } catch(err) {
+                console.error(err);
+                alert("Gagal mengedit data.");
+            }
+            btn.innerText = "Simpan Edit"; btn.disabled = false;
+        };
+
+        // --- SISTEM ASSET DETAIL, EDIT, STATUS ---
         window.openAssetDetail = (id) => {
             const asset = window.state.assets.find(a => a.id === id);
             if(!asset) return;
@@ -1373,7 +1541,7 @@
                 const tglEnd = endDateObj.toISOString().split('T')[0];
 
                 await updateDoc(doc(db, "rooms", roomId), {
-                    status: 'Terisi', tenantName: tenantName, tenantPhone: tenantPhone, startDate: tglMulai, endDate: tglEnd, tenantKtp: base64Ktp
+                    status: 'Terisi', tenantName: tenantName, tenantPhone: tenantPhone, startDate: tglMulai, endDate: tglEnd, tenantKtp: base64Ktp, lastReceipt: base64Bukti
                 });
 
                 const todayDate = new Date().toISOString().split('T')[0];
@@ -1393,8 +1561,26 @@
         };
 
         window.confirmCheckout = (roomId) => {
-            window.confirmAction("Kosongkan Kamar", "Penyewa akan dikeluarkan. Lanjutkan?", async () => {
-                await updateDoc(doc(db, "rooms", roomId), { status: 'Kosong', tenantName: '', tenantPhone: '', tenantKtp: '', startDate: '', endDate: '' });
+            window.confirmAction("Keluarkan Penyewa", "Penyewa akan dikeluarkan. Data akan dipindah ke Riwayat Keluar.", async () => {
+                const room = window.state.rooms.find(r => r.id === roomId);
+                
+                if(room && room.tenantName) {
+                    await addDoc(collection(db, "tenant_history"), {
+                        roomId: room.id,
+                        roomName: room.name,
+                        tenantName: room.tenantName,
+                        tenantPhone: room.tenantPhone || '',
+                        startDate: room.startDate,
+                        endDate: room.endDate,
+                        tenantKtp: room.tenantKtp || '',
+                        checkoutDate: new Date().toISOString().split('T')[0],
+                        timestamp: Date.now()
+                    });
+                }
+                
+                await updateDoc(doc(db, "rooms", roomId), { 
+                    status: 'Kosong', tenantName: '', tenantPhone: '', tenantKtp: '', lastReceipt: '', startDate: '', endDate: '' 
+                });
             });
         };
 
@@ -1440,6 +1626,13 @@
                 window.state.transactions.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
                 window.renderAll();
             }, (err) => console.error("Transaction listener error", err));
+
+            // Listener untuk data riwayat penyewa keluar
+            onSnapshot(collection(db, "tenant_history"), (snapshot) => {
+                window.state.tenantHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                window.state.tenantHistory.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+                window.renderAll();
+            }, (err) => console.error("Tenant history listener error", err));
         };
         
         // --- PWA INSTALL PROMPT LOGIC ---
