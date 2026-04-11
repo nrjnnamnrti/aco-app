@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kontrakan-cache-v5';
+const CACHE_NAME = 'kontrakan-cache-v6';
 const urlsToCache = [
   './',
   './index.html',
@@ -16,21 +16,8 @@ self.addEventListener('install', event => {
         return cache.addAll(urlsToCache);
       })
   );
+  // Memaksa Service Worker baru untuk langsung mengambil alih tanpa menunggu tab ditutup
   self.skipWaiting();
-});
-
-// Event Fetch: Menyediakan file dari cache jika tidak ada internet
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Jika file ada di cache, gunakan itu. Jika tidak, ambil dari internet.
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
-  );
 });
 
 // Event Activate: Membersihkan cache versi lama jika ada update
@@ -41,11 +28,34 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Menghapus cache lama:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
   );
+  // Memastikan semua halaman langsung menggunakan Service Worker terbaru
   self.clients.claim();
+});
+
+// Event Fetch: STRATEGI NETWORK FIRST (Utamakan Internet)
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    // 1. Coba ambil file terbaru dari internet (GitHub)
+    fetch(event.request)
+      .then(response => {
+        // Jika internet jalan dan file didapat, simpan diam-diam ke dalam memori
+        // agar bisa dipakai saat offline nanti.
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseClone);
+        });
+        return response;
+      })
+      .catch(() => {
+        // 2. Jika GAGAL (karena tidak ada sinyal internet), barulah pakai file dari memori HP
+        return caches.match(event.request);
+      })
+  );
 });
