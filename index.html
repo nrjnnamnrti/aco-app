@@ -590,8 +590,21 @@
             return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()} ${dt.getHours()}:${dt.getMinutes()}`;
         }
         
+        // Memperbaiki penanganan error dan membatasi ukuran/format gambar
         const getBase64Compressed = (file) => new Promise((resolve, reject) => {
             if(!file) return resolve(dummyImg);
+
+            // Validasi Format Gambar
+            if (!file.type.match('image.*')) {
+                return reject(new Error("File yang dipilih bukan format gambar yang valid."));
+            }
+
+            // Validasi Ukuran Maksimal (10 MB) untuk mencegah browser HP kepenuhan memori
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                return reject(new Error("Ukuran foto terlalu besar (Maks 10 MB). Silakan kecilkan resolusi foto di pengaturan kamera."));
+            }
+
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = (e) => {
@@ -612,10 +625,10 @@
                     ctx.drawImage(img, 0, 0, width, height);
                     resolve(canvas.toDataURL('image/jpeg', 0.5));
                 };
-                img.onerror = () => reject(new Error("Format gambar tidak valid atau rusak."));
+                img.onerror = () => reject(new Error("Format gambar ini tidak didukung oleh browser Anda (hindari memotret dengan format HEIC)."));
                 img.src = e.target.result;
             };
-            reader.onerror = () => reject(new Error("Gagal membaca file gambar dari perangkat Anda."));
+            reader.onerror = () => reject(new Error("Gagal membaca file dari penyimpanan. Pastikan browser diizinkan mengakses Galeri."));
         });
 
         const updateRoomStatuses = () => {
@@ -707,7 +720,6 @@
             document.getElementById('dashPengeluaran').innerText = formatRp(sumKeluar);
             document.getElementById('dashKamarTerisi').innerText = `${sumTerisi} dari ${window.state.rooms.length}`;
 
-            // Ditambahkan: Kolom Aksi Hapus di Dashboard
             const htmlTrx = window.state.transactions.slice(0, 5).map(trx => `
                 <tr class="hover:bg-slate-50">
                     <td class="px-5 py-3 whitespace-nowrap">${formatTgl(trx.date)}</td>
@@ -808,7 +820,6 @@
             `).join('');
             document.getElementById('tableSewaAktif').innerHTML = htmlAktif || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Semua kamar kosong</td></tr>`;
 
-            // Ditambahkan: Kolom Aksi Hapus di Riwayat Sewa
             const htmlRiwayat = window.state.transactions.filter(t => t.type === 'Pemasukan').map(trx => `
                 <tr class="hover:bg-slate-50">
                     <td class="px-5 py-3 whitespace-nowrap">${formatTgl(trx.date)}</td>
@@ -1227,7 +1238,6 @@
         };
 
         // --- SEWA LOGIC & CONFIRM ---
-        // FUNGSI BARU: Generate Pilihan Bulan Dinamis berdasarkan Tgl Mulai
         window.updateDurasiOptions = () => {
             const tglMulai = document.getElementById('sewaTglMulai').value;
             const select = document.getElementById('sewaDurasi');
@@ -1241,7 +1251,6 @@
             let html = '';
             const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
             
-            // Generate list untuk 12 bulan ke depan
             for(let i=1; i<=12; i++) {
                 const endTarget = new Date(start);
                 endTarget.setMonth(endTarget.getMonth() + (i - 1));
@@ -1249,7 +1258,6 @@
                 const yName = endTarget.getFullYear();
                 
                 if (i === 1) {
-                    // Jika 1 Bulan: cukup sebutkan nama bulannya (contoh: April 2026)
                     html += `<option value="1">1 Bulan (${mName} ${yName})</option>`;
                 } else {
                     const firstTarget = new Date(start);
@@ -1280,7 +1288,6 @@
             tglMulaiEl.readOnly = false;
             tglMulaiEl.classList.remove('bg-slate-100', 'text-slate-500');
 
-            // Panggil fungsi update nama bulan ke dropdown
             window.updateDurasiOptions();
             
             const options = window.state.rooms.filter(r => r.status === 'Kosong').map(r => `<option value="${r.id}">${r.name} - ${formatRp(r.price)}/bln</option>`).join('');
@@ -1305,7 +1312,6 @@
             tglMulaiEl.readOnly = true;
             tglMulaiEl.classList.add('bg-slate-100', 'text-slate-500');
 
-            // Panggil fungsi update nama bulan ke dropdown berdasarkan Tanggal Berakhir lama
             window.updateDurasiOptions();
             
             window.kalkulasiSewa();
@@ -1344,7 +1350,7 @@
                 
                 const durasiEl = document.getElementById('sewaDurasi');
                 const durasi = Number(durasiEl.value);
-                const durasiTeks = durasiEl.options[durasiEl.selectedIndex].text; // Ambil teks bulan dari dropdown
+                const durasiTeks = durasiEl.options[durasiEl.selectedIndex].text; 
                 
                 if(!tglMulai) throw new Error("Tanggal mulai belum dipilih.");
                 if(durasi < 1) throw new Error("Durasi tidak valid.");
@@ -1358,7 +1364,6 @@
                 let ktpImage = fileKtp ? await getBase64Compressed(fileKtp) : dummyImg;
                 const buktiImage = fileBukti ? await getBase64Compressed(fileBukti) : dummyImg;
 
-                // Jika perpanjang dan tidak upload KTP baru, gunakan KTP lama
                 if (mode === 'perpanjang' && !fileKtp && room.tenantKtp) {
                     ktpImage = room.tenantKtp;
                 }
@@ -1374,10 +1379,8 @@
                     status: 'Terisi', tenantName: tenantName, tenantPhone: tenantPhone, startDate: tglMulai, endDate: tglEnd, tenantKtp: ktpImage
                 });
 
-                // Tanggal transaksi pembayaran selalu otomatis direkam HARI INI
                 const todayDate = new Date().toISOString().split('T')[0];
                 
-                // Gunakan teks bulan yang dipilih sebagai keterangan Laporan Keuangan
                 const desc = mode === 'baru' ? `Sewa Baru ${room.name} (${tenantName}) : ${durasiTeks}` : `Perpanjang ${room.name} (${tenantName}) : ${durasiTeks}`;
                 
                 await addDoc(collection(db, "transactions"), {
