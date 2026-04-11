@@ -133,6 +133,7 @@
                                     <th class="px-5 py-3">Keterangan</th>
                                     <th class="px-5 py-3">Tipe</th>
                                     <th class="px-5 py-3 text-right">Nominal</th>
+                                    <th class="px-5 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="tableDashTrx" class="divide-y divide-slate-100"></tbody>
@@ -210,7 +211,8 @@
                                     <th class="px-5 py-3">Tanggal</th>
                                     <th class="px-5 py-3">Keterangan</th>
                                     <th class="px-5 py-3">Nominal</th>
-                                    <th class="px-5 py-3">Bukti</th>
+                                    <th class="px-5 py-3 text-center">Bukti</th>
+                                    <th class="px-5 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="tableRiwayatSewa" class="divide-y divide-slate-100"></tbody>
@@ -244,6 +246,7 @@
         </main>
     </div>
 
+    <!-- Modal Detail Aset -->
     <div id="modalAssetDetail" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-start border-b border-slate-100 pb-3 mb-4">
@@ -288,6 +291,7 @@
         </div>
     </div>
 
+    <!-- Modal Edit Aset -->
     <div id="modalEditAsset" class="fixed inset-0 bg-slate-900/60 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
             <h2 class="text-lg font-bold text-slate-800 mb-4">Edit Data Aset</h2>
@@ -315,6 +319,7 @@
         </div>
     </div>
 
+    <!-- Modal Status Aset -->
     <div id="modalStatusAsset" class="fixed inset-0 bg-slate-900/60 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
             <h2 class="text-lg font-bold text-slate-800 mb-4">Ubah Status Aset</h2>
@@ -339,6 +344,7 @@
         </div>
     </div>
 
+    <!-- Modal Tambah Aset -->
     <div id="modalAset" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold text-slate-800 mb-4">Catat Pembelian Aset</h2>
@@ -393,6 +399,7 @@
         </div>
     </div>
 
+    <!-- Modal Tambah/Edit Kamar -->
     <div id="modalKamar" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold text-slate-800 mb-4" id="titleModalKamar">Tambah Kamar</h2>
@@ -459,6 +466,7 @@
         </div>
     </div>
 
+    <!-- Modal Sewa -->
     <div id="modalSewa" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold text-slate-800 mb-4" id="titleModalSewa">Input Pembayaran Sewa</h2>
@@ -472,14 +480,20 @@
                     <label class="block text-sm font-medium text-slate-600 mb-1">Nama Penyewa</label>
                     <input type="text" id="sewaPenyewa" required class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500">
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">No. WhatsApp (Opsional)</label>
+                    <input type="tel" id="sewaPhone" placeholder="Contoh: 081234567890" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500">
+                </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Tgl Mulai</label>
-                        <input type="date" id="sewaTglMulai" required class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm">
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Tgl Mulai Sewa</label>
+                        <!-- Trigger ubah durasi dropdown saat tanggal berubah -->
+                        <input type="date" id="sewaTglMulai" required onchange="window.updateDurasiOptions()" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm transition-colors">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Durasi (Bulan)</label>
-                        <input type="number" id="sewaDurasi" value="1" min="1" required oninput="kalkulasiSewa()" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm">
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Durasi Sewa</label>
+                        <!-- Dropdown durasi akan di-generate oleh JavaScript agar ada nama Bulannya -->
+                        <select id="sewaDurasi" required onchange="window.kalkulasiSewa()" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm bg-white"></select>
                     </div>
                 </div>
                 <div>
@@ -498,6 +512,7 @@
         </div>
     </div>
 
+    <!-- Modal Confirm -->
     <div id="modalConfirm" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -512,11 +527,13 @@
         </div>
     </div>
 
+    <!-- Lightbox -->
     <div id="modalLightbox" class="fixed inset-0 bg-black/90 z-[70] hidden flex flex-col items-center justify-center p-4" onclick="closeModal('modalLightbox')">
         <button class="absolute top-4 right-4 text-white p-2 bg-white/10 rounded-full hover:bg-white/20 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
         <img id="lightboxImage" src="" alt="Preview" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain">
     </div>
 
+    <!-- PWA Banner -->
     <div id="pwaInstallBanner" class="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.1)] z-[80] hidden flex justify-between items-center border-t border-indigo-100 rounded-t-2xl transform transition-transform duration-300 translate-y-full">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
@@ -538,7 +555,6 @@
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // KONFIGURASI BARU ANDA (aco-app-11a2d)
         const firebaseConfig = {
             apiKey: "AIzaSyBNWxxQIhfMforEazNKzsqOAXPb8FObO1I",
             authDomain: "aco-app-11a2d.firebaseapp.com",
@@ -574,7 +590,6 @@
             reader.readAsDataURL(file);
             reader.onload = (e) => {
                 const img = new Image();
-                img.src = e.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     const MAX_WIDTH = 800; 
@@ -590,9 +605,11 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     resolve(canvas.toDataURL('image/jpeg', 0.5));
-                }
+                };
+                img.onerror = () => reject(new Error("Format gambar tidak valid atau rusak."));
+                img.src = e.target.result;
             };
-            reader.onerror = error => reject(error);
+            reader.onerror = () => reject(new Error("Gagal membaca file gambar dari perangkat Anda."));
         });
 
         const updateRoomStatuses = () => {
@@ -625,7 +642,6 @@
                     document.getElementById('appScreen').classList.remove('hidden');
                     window.initApp();
                 } catch (error) {
-                    // Fitur menampilkan pesan error asli untuk mempermudah deteksi masalah
                     document.getElementById('loginError').innerText = "Gagal. Pesan Error Firebase: " + error.message;
                     document.getElementById('loginError').classList.remove('hidden');
                 }
@@ -685,15 +701,19 @@
             document.getElementById('dashPengeluaran').innerText = formatRp(sumKeluar);
             document.getElementById('dashKamarTerisi').innerText = `${sumTerisi} dari ${window.state.rooms.length}`;
 
+            // Ditambahkan: Kolom Aksi Hapus di Dashboard
             const htmlTrx = window.state.transactions.slice(0, 5).map(trx => `
                 <tr class="hover:bg-slate-50">
                     <td class="px-5 py-3 whitespace-nowrap">${formatTgl(trx.date)}</td>
                     <td class="px-5 py-3 text-slate-800">${trx.desc}</td>
                     <td class="px-5 py-3"><span class="${trx.type === 'Pemasukan' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'} px-2 py-1 rounded text-xs font-semibold">${trx.type}</span></td>
                     <td class="px-5 py-3 text-right font-medium ${trx.type === 'Pemasukan' ? 'text-green-600' : 'text-red-600'}">${trx.type === 'Pemasukan' ? '+' : '-'}${formatRp(trx.amount)}</td>
+                    <td class="px-5 py-3 text-center">
+                        <button onclick="window.confirmDeleteTransaction('${trx.id}')" title="Hapus Transaksi" class="text-red-400 hover:text-red-600 p-1.5 bg-red-50 hover:bg-red-100 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
                 </tr>
             `).join('');
-            document.getElementById('tableDashTrx').innerHTML = htmlTrx || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Belum ada transaksi</td></tr>`;
+            document.getElementById('tableDashTrx').innerHTML = htmlTrx || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Belum ada transaksi</td></tr>`;
         };
 
         const renderUnitAset = () => {
@@ -724,6 +744,7 @@
                         <div class="bg-slate-50 p-3 rounded-lg mb-3 mt-2 border border-slate-100">
                             <p class="text-xs text-slate-500 mb-1">Penyewa Aktif:</p>
                             <p class="font-semibold text-slate-700 flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> ${room.tenantName}</p>
+                            ${room.tenantPhone ? `<a href="https://wa.me/${room.tenantPhone}" target="_blank" class="text-xs text-green-600 mt-1 flex items-center gap-1 hover:underline"><i data-lucide="phone" class="w-3 h-3"></i> Hubungi WA</a>` : ''}
                             <p class="text-xs text-red-500 mt-1 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Jatuh Tempo: ${formatTgl(room.endDate)}</p>
                         </div>
                         ` : '<div class="h-4"></div>'}
@@ -761,7 +782,10 @@
             const htmlAktif = terisi.map(room => `
                 <tr class="hover:bg-slate-50">
                     <td class="px-5 py-3 font-bold text-slate-700">${room.name}</td>
-                    <td class="px-5 py-3 font-medium text-indigo-700">${room.tenantName}</td>
+                    <td class="px-5 py-3">
+                        <div class="font-medium text-indigo-700">${room.tenantName}</div>
+                        ${room.tenantPhone ? `<a href="https://wa.me/${room.tenantPhone}" target="_blank" class="text-[10px] text-green-600 flex items-center gap-1 hover:underline mt-0.5"><i data-lucide="phone" class="w-3 h-3"></i> ${room.tenantPhone}</a>` : ''}
+                    </td>
                     <td class="px-5 py-3 text-sm">${formatTgl(room.endDate)}</td>
                     <td class="px-5 py-3"><span class="${room.status === 'Jatuh Tempo' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'} px-2 py-1 rounded text-xs font-semibold">${room.status}</span></td>
                     <td class="px-5 py-3 text-right space-x-1 whitespace-nowrap">
@@ -772,17 +796,21 @@
             `).join('');
             document.getElementById('tableSewaAktif').innerHTML = htmlAktif || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Semua kamar kosong</td></tr>`;
 
+            // Ditambahkan: Kolom Aksi Hapus di Riwayat Sewa
             const htmlRiwayat = window.state.transactions.filter(t => t.type === 'Pemasukan').map(trx => `
                 <tr class="hover:bg-slate-50">
                     <td class="px-5 py-3 whitespace-nowrap">${formatTgl(trx.date)}</td>
                     <td class="px-5 py-3 text-slate-700">${trx.desc}</td>
                     <td class="px-5 py-3 text-green-600 font-bold">+${formatRp(trx.amount)}</td>
-                    <td class="px-5 py-3">
+                    <td class="px-5 py-3 text-center">
                         ${trx.image && trx.image !== dummyImg ? `<button onclick="window.openLightbox('${trx.image}')" title="Lihat Bukti" class="text-indigo-500 hover:text-indigo-700 p-1.5 bg-indigo-50 hover:bg-indigo-100 rounded transition"><i data-lucide="file-text" class="w-4 h-4"></i></button>` : '-'}
+                    </td>
+                    <td class="px-5 py-3 text-center">
+                        <button onclick="window.confirmDeleteTransaction('${trx.id}')" title="Hapus Riwayat" class="text-red-400 hover:text-red-600 p-1.5 bg-red-50 hover:bg-red-100 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 </tr>
             `).join('');
-            document.getElementById('tableRiwayatSewa').innerHTML = htmlRiwayat || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Belum ada riwayat sewa</td></tr>`;
+            document.getElementById('tableRiwayatSewa').innerHTML = htmlRiwayat || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Belum ada riwayat sewa</td></tr>`;
         };
 
         const renderPengaturan = () => {
@@ -798,6 +826,18 @@
                 </tr>
             `).join('');
             document.getElementById('tableMasterKamar').innerHTML = htmlKamar || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Data master kosong</td></tr>`;
+        };
+
+        // --- SISTEM HAPUS RIWAYAT TRANSAKSI (BARU) ---
+        window.confirmDeleteTransaction = (id) => {
+            window.confirmAction("Hapus Riwayat", "Data ini akan dihapus dari riwayat transaksi dan kalkulasi Dashboard akan menyesuaikan. Lanjutkan?", async () => {
+                try {
+                    await deleteDoc(doc(db, "transactions", id));
+                } catch(err) {
+                    console.error(err);
+                    alert("Gagal menghapus data riwayat.");
+                }
+            });
         };
 
         // --- SISTEM ASSET DETAIL, EDIT, STATUS ---
@@ -903,7 +943,10 @@
                 }
                 
                 window.closeModal('modalEditAsset');
-            } catch(err) { alert("Gagal mengedit data."); }
+            } catch(err) { 
+                console.error(err);
+                alert("Gagal mengedit data: " + (err.message || "")); 
+            }
             btn.innerText = "Simpan Edit"; btn.disabled = false;
         };
 
@@ -938,7 +981,10 @@
                 asset.status = newStatus; asset.statusNote = newNote; asset.history = newHistory;
                 window.openAssetDetail(asset.id);
                 window.closeModal('modalStatusAsset');
-            } catch(err) { alert("Gagal update status."); }
+            } catch(err) { 
+                console.error(err);
+                alert("Gagal update status: " + (err.message || "")); 
+            }
             btn.innerText = "Simpan Status"; btn.disabled = false;
         };
 
@@ -969,7 +1015,10 @@
                     await deleteDoc(doc(db, "assets", id));
                     window.closeModal('modalAssetDetail');
                     alert("Data berhasil dihapus!");
-                } catch (err) { alert("Gagal menghapus data."); }
+                } catch (err) { 
+                    console.error(err);
+                    alert("Gagal menghapus data: " + (err.message || "")); 
+                }
             } else {
                 if(userInput !== null) alert("Teks tidak sesuai. Penghapusan dibatalkan.");
             }
@@ -1024,7 +1073,10 @@
                 
                 window.toggleInputFasilitas();
                 window.renderTempFasilitas();
-            } catch (err) { alert("Gagal memproses gambar fasilitas"); }
+            } catch (err) { 
+                console.error(err);
+                alert("Gagal memproses gambar fasilitas: " + (err.message || "")); 
+            }
             btn.innerText = "Tambahkan"; btn.disabled = false;
         };
 
@@ -1097,7 +1149,10 @@
                     });
                 }
                 window.closeModal('modalKamar');
-            } catch (err) { alert("Gagal menyimpan data kamar."); }
+            } catch (err) { 
+                console.error(err);
+                alert("Gagal menyimpan data kamar: " + (err.message || "")); 
+            }
             btn.innerText = "Simpan Kamar"; btn.disabled = false;
         };
 
@@ -1149,18 +1204,69 @@
                 e.target.reset();
                 window.closeModal('modalAset');
                 window.togglePilihKamar();
-            } catch (err) { alert("Gagal simpan aset."); }
+            } catch (err) { 
+                console.error(err);
+                alert("Gagal simpan aset: " + (err.message || "")); 
+            }
             btn.innerText = "Simpan Aset"; btn.disabled = false;
         };
 
         // --- SEWA LOGIC & CONFIRM ---
+        // FUNGSI BARU: Generate Pilihan Bulan Dinamis berdasarkan Tgl Mulai
+        window.updateDurasiOptions = () => {
+            const tglMulai = document.getElementById('sewaTglMulai').value;
+            const select = document.getElementById('sewaDurasi');
+            
+            if(!tglMulai) {
+                select.innerHTML = '<option value="1">1 Bulan</option>';
+                return;
+            }
+            
+            const start = new Date(tglMulai);
+            let html = '';
+            const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            // Generate list untuk 12 bulan ke depan
+            for(let i=1; i<=12; i++) {
+                const endTarget = new Date(start);
+                endTarget.setMonth(endTarget.getMonth() + (i - 1));
+                const mName = namaBulan[endTarget.getMonth()];
+                const yName = endTarget.getFullYear();
+                
+                if (i === 1) {
+                    // Jika 1 Bulan: cukup sebutkan nama bulannya (contoh: April 2026)
+                    html += `<option value="1">1 Bulan (${mName} ${yName})</option>`;
+                } else {
+                    const firstTarget = new Date(start);
+                    const firstMName = namaBulan[firstTarget.getMonth()];
+                    const firstYName = firstTarget.getFullYear();
+                    
+                    if(firstYName === yName) {
+                        html += `<option value="${i}">${i} Bulan (${firstMName} - ${mName} ${yName})</option>`;
+                    } else {
+                        html += `<option value="${i}">${i} Bulan (${firstMName} ${firstYName} - ${mName} ${yName})</option>`;
+                    }
+                }
+            }
+            select.innerHTML = html;
+            window.kalkulasiSewa();
+        };
+
         window.openInputSewa = () => { 
             document.getElementById('titleModalSewa').innerText = "Input Sewa Baru";
             document.getElementById('sewaMode').value = "baru";
             document.getElementById('sewaPenyewa').disabled = false;
             document.getElementById('sewaPenyewa').value = "";
-            document.getElementById('sewaTglMulai').value = new Date().toISOString().split('T')[0];
-            document.getElementById('sewaDurasi').value = 1;
+            document.getElementById('sewaPhone').disabled = false;
+            document.getElementById('sewaPhone').value = "";
+            
+            const tglMulaiEl = document.getElementById('sewaTglMulai');
+            tglMulaiEl.value = new Date().toISOString().split('T')[0];
+            tglMulaiEl.readOnly = false;
+            tglMulaiEl.classList.remove('bg-slate-100', 'text-slate-500');
+
+            // Panggil fungsi update nama bulan ke dropdown
+            window.updateDurasiOptions();
             
             const options = window.state.rooms.filter(r => r.status === 'Kosong').map(r => `<option value="${r.id}">${r.name} - ${formatRp(r.price)}/bln</option>`).join('');
             document.getElementById('sewaKamarId').innerHTML = options || `<option value="" disabled selected>-- Semua Kamar Terisi --</option>`;
@@ -1176,8 +1282,16 @@
             document.getElementById('sewaKamarId').innerHTML = `<option value="${room.id}">${room.name} - ${formatRp(room.price)}/bln</option>`;
             document.getElementById('sewaPenyewa').value = room.tenantName;
             document.getElementById('sewaPenyewa').disabled = true;
-            document.getElementById('sewaTglMulai').value = new Date().toISOString().split('T')[0];
-            document.getElementById('sewaDurasi').value = 1;
+            document.getElementById('sewaPhone').value = room.tenantPhone || "";
+            document.getElementById('sewaPhone').disabled = false; 
+            
+            const tglMulaiEl = document.getElementById('sewaTglMulai');
+            tglMulaiEl.value = room.endDate || new Date().toISOString().split('T')[0];
+            tglMulaiEl.readOnly = true;
+            tglMulaiEl.classList.add('bg-slate-100', 'text-slate-500');
+
+            // Panggil fungsi update nama bulan ke dropdown berdasarkan Tanggal Berakhir lama
+            window.updateDurasiOptions();
             
             window.kalkulasiSewa();
             window.openModal('modalSewa');
@@ -1187,7 +1301,8 @@
             const roomId = document.getElementById('sewaKamarId').value;
             const durasi = Number(document.getElementById('sewaDurasi').value) || 0;
             if(!roomId) { document.getElementById('sewaTotalTeks').innerText = 'Rp 0'; return; }
-            const price = window.state.rooms.find(r => r.id === roomId).price;
+            const room = window.state.rooms.find(r => String(r.id) === String(roomId));
+            const price = room ? room.price : 0;
             document.getElementById('sewaTotalTeks').innerText = formatRp(price * durasi);
         };
 
@@ -1200,12 +1315,31 @@
                 const mode = document.getElementById('sewaMode').value;
                 const roomId = document.getElementById('sewaKamarId').value;
                 const tenantName = document.getElementById('sewaPenyewa').value;
+                
+                if(!roomId) throw new Error("Pilih kamar terlebih dahulu.");
+                if(!tenantName) throw new Error("Nama penyewa wajib diisi.");
+
+                let tenantPhoneRaw = document.getElementById('sewaPhone').value || "";
+                let tenantPhone = tenantPhoneRaw.replace(/\D/g, ''); 
+                if (tenantPhone.startsWith('0')) {
+                    tenantPhone = '62' + tenantPhone.substring(1); 
+                }
+
                 const tglMulai = document.getElementById('sewaTglMulai').value;
-                const durasi = Number(document.getElementById('sewaDurasi').value);
+                
+                const durasiEl = document.getElementById('sewaDurasi');
+                const durasi = Number(durasiEl.value);
+                const durasiTeks = durasiEl.options[durasiEl.selectedIndex].text; // Ambil teks bulan dari dropdown
+                
+                if(!tglMulai) throw new Error("Tanggal mulai belum dipilih.");
+                if(durasi < 1) throw new Error("Durasi tidak valid.");
+
                 const file = document.getElementById('sewaBukti').files[0];
                 const image = file ? await getBase64Compressed(file) : dummyImg;
 
-                const room = window.state.rooms.find(r => r.id === roomId);
+                const room = window.state.rooms.find(r => String(r.id) === String(roomId));
+                if(!room) throw new Error("Data kamar tidak ditemukan.");
+                
                 const amount = room.price * durasi;
 
                 const startDateObj = new Date(tglMulai);
@@ -1214,23 +1348,31 @@
                 const tglEnd = endDateObj.toISOString().split('T')[0];
 
                 await updateDoc(doc(db, "rooms", roomId), {
-                    status: 'Terisi', tenantName: tenantName, startDate: tglMulai, endDate: tglEnd
+                    status: 'Terisi', tenantName: tenantName, tenantPhone: tenantPhone, startDate: tglMulai, endDate: tglEnd
                 });
 
-                const desc = mode === 'baru' ? `Sewa Baru ${room.name} (${tenantName}) - ${durasi} Bln` : `Perpanjang ${room.name} (${tenantName}) - ${durasi} Bln`;
+                // Tanggal transaksi pembayaran selalu otomatis direkam HARI INI
+                const todayDate = new Date().toISOString().split('T')[0];
+                
+                // Gunakan teks bulan yang dipilih sebagai keterangan Laporan Keuangan
+                const desc = mode === 'baru' ? `Sewa Baru ${room.name} (${tenantName}) : ${durasiTeks}` : `Perpanjang ${room.name} (${tenantName}) : ${durasiTeks}`;
+                
                 await addDoc(collection(db, "transactions"), {
-                    type: 'Pemasukan', category: 'Sewa', amount, date: tglMulai, desc, image, timestamp: Date.now()
+                    type: 'Pemasukan', category: 'Sewa', amount, date: todayDate, desc, image, timestamp: Date.now()
                 });
 
                 e.target.reset();
                 window.closeModal('modalSewa');
-            } catch (err) { alert("Gagal memproses sewa."); }
+            } catch (err) { 
+                console.error(err);
+                alert("Gagal memproses data sewa: " + (err.message || "")); 
+            }
             btn.innerText = "Simpan Sewa"; btn.disabled = false;
         };
 
         window.confirmCheckout = (roomId) => {
             window.confirmAction("Kosongkan Kamar", "Penyewa akan dikeluarkan. Lanjutkan?", async () => {
-                await updateDoc(doc(db, "rooms", roomId), { status: 'Kosong', tenantName: '', startDate: '', endDate: '' });
+                await updateDoc(doc(db, "rooms", roomId), { status: 'Kosong', tenantName: '', tenantPhone: '', startDate: '', endDate: '' });
             });
         };
 
