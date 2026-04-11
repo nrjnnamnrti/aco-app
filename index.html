@@ -54,7 +54,7 @@
             </div>
             <div class="flex items-center justify-center gap-2 mb-1">
                 <h1 class="text-2xl font-bold text-slate-800">ACO</h1>
-                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">v2.13</span>
+                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">v2.14</span>
             </div>
             <p class="text-slate-500 text-sm mb-6">Silakan login untuk mengelola properti</p>
             
@@ -158,7 +158,7 @@
                         <h2 class="font-bold text-slate-800 flex items-center gap-2">
                             <i data-lucide="package" class="w-5 h-5 text-indigo-500"></i> Inventaris & Aset
                         </h2>
-                        <button onclick="openModal('modalAset')" title="Tambah Aset" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 p-2.5 rounded-lg transition"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                        <button onclick="window.openTambahAset()" title="Tambah Aset" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 p-2.5 rounded-lg transition"><i data-lucide="plus" class="w-5 h-5"></i></button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-slate-600">
@@ -460,11 +460,13 @@
                 <div class="grid grid-cols-2 gap-3 pt-2">
                     <div>
                         <label class="block text-[10px] font-medium text-slate-600 mb-1">Foto Produk</label>
-                        <input type="file" id="asetFoto" accept="image/*" required class="w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700">
+                        <input type="file" id="asetFoto" accept="image/*" onchange="window.previewImage('asetFoto', 'prevAsetFoto')" required class="w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700 disabled:opacity-50">
+                        <img id="prevAsetFoto" src="" class="hidden mt-2 h-16 w-16 object-cover rounded shadow-sm border border-slate-200 cursor-pointer hover:opacity-80" onclick="window.openLightbox(this.src)">
                     </div>
                     <div>
                         <label class="block text-[10px] font-medium text-slate-600 mb-1">Foto Nota</label>
-                        <input type="file" id="asetNota" accept="image/*" required class="w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700">
+                        <input type="file" id="asetNota" accept="image/*" onchange="window.previewImage('asetNota', 'prevAsetNota')" required class="w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700 disabled:opacity-50">
+                        <img id="prevAsetNota" src="" class="hidden mt-2 h-16 w-16 object-cover rounded shadow-sm border border-slate-200 cursor-pointer hover:opacity-80" onclick="window.openLightbox(this.src)">
                     </div>
                 </div>
                 <div class="flex gap-3 mt-6">
@@ -510,11 +512,13 @@
                         <div class="space-y-2">
                             <div>
                                 <label class="text-[10px] text-slate-500">Foto Barang (Opsional)</label>
-                                <input type="file" id="fasFoto" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700">
+                                <input type="file" id="fasFoto" accept="image/*" onchange="window.previewImage('fasFoto', 'prevFasFoto')" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700 disabled:opacity-50">
+                                <img id="prevFasFoto" src="" class="hidden mt-2 h-16 w-16 object-cover rounded shadow-sm border border-slate-200 cursor-pointer hover:opacity-80" onclick="window.openLightbox(this.src)">
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500">Bukti Transfer/Nota (Opsional)</label>
-                                <input type="file" id="fasBukti" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700">
+                                <input type="file" id="fasBukti" accept="image/*" onchange="window.previewImage('fasBukti', 'prevFasBukti')" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700 disabled:opacity-50">
+                                <img id="prevFasBukti" src="" class="hidden mt-2 h-16 w-16 object-cover rounded shadow-sm border border-slate-200 cursor-pointer hover:opacity-80" onclick="window.openLightbox(this.src)">
                             </div>
                         </div>
 
@@ -530,7 +534,8 @@
 
                 <div>
                     <label class="block text-sm font-medium text-slate-600 mb-1">Foto Cover Kamar (Opsional)</label>
-                    <input type="file" id="kamarFoto" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    <input type="file" id="kamarFoto" accept="image/*" onchange="window.previewImage('kamarFoto', 'prevKamarFoto')" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 disabled:opacity-50">
+                    <img id="prevKamarFoto" src="" class="hidden mt-2 h-20 w-32 object-cover rounded shadow-sm border border-slate-200 cursor-pointer hover:opacity-80" onclick="window.openLightbox(this.src)">
                 </div>
                 
                 <div class="flex gap-3 mt-6">
@@ -571,11 +576,13 @@
                 <div class="grid grid-cols-2 gap-3 pt-1">
                     <div>
                         <label class="block text-[10px] font-medium text-slate-600 mb-1">Foto KTP (Opsional)</label>
-                        <input type="file" id="sewaKtp" accept="image/*" class="w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700">
+                        <input type="file" id="sewaKtp" accept="image/*" onchange="window.previewImage('sewaKtp', 'prevSewaKtp')" class="w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700 disabled:opacity-50">
+                        <img id="prevSewaKtp" src="" class="hidden mt-2 h-16 w-16 object-cover rounded shadow-sm border border-slate-200 cursor-pointer hover:opacity-80" onclick="window.openLightbox(this.src)">
                     </div>
                     <div>
                         <label class="block text-[10px] font-medium text-slate-600 mb-1">Bukti Transfer (Opsional)</label>
-                        <input type="file" id="sewaBukti" accept="image/*" class="w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700">
+                        <input type="file" id="sewaBukti" accept="image/*" onchange="window.previewImage('sewaBukti', 'prevSewaBukti')" class="w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700 disabled:opacity-50">
+                        <img id="prevSewaBukti" src="" class="hidden mt-2 h-16 w-16 object-cover rounded shadow-sm border border-slate-200 cursor-pointer hover:opacity-80" onclick="window.openLightbox(this.src)">
                     </div>
                 </div>
                 <div class="bg-green-50 p-4 rounded-lg border border-green-100 mt-2">
@@ -703,6 +710,53 @@
             
             img.src = imgUrl;
         });
+
+        // FUNGSI BARU: Pratinjau & Kompresi Instan saat foto dipilih
+        window.previewImage = async (inputId, previewId) => {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            const file = input.files[0];
+
+            if(!file) {
+                preview.classList.add('hidden');
+                input.dataset.base64 = '';
+                return;
+            }
+
+            try {
+                input.disabled = true; // Kunci tombol sementara
+                const base64 = await compressImageToBase64(file);
+                input.dataset.base64 = base64; // Simpan teks panjang di latar belakang
+                preview.src = base64;
+                preview.classList.remove('hidden'); // Munculkan gambar kecil
+            } catch (err) {
+                alert("Gagal memproses gambar: " + err.message);
+                input.value = '';
+                preview.classList.add('hidden');
+                input.dataset.base64 = '';
+            } finally {
+                input.disabled = false; // Buka kunci tombol
+            }
+        };
+
+        // FUNGSI BARU: Mereset semua gambar kecil saat menutup/membuka formulir
+        window.resetFormPreviews = () => {
+            const prevIds = ['prevAsetFoto', 'prevAsetNota', 'prevSewaKtp', 'prevSewaBukti', 'prevFasFoto', 'prevFasBukti', 'prevKamarFoto'];
+            prevIds.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.src = '';
+                    el.classList.add('hidden');
+                }
+            });
+            const inputIds = ['asetFoto', 'asetNota', 'sewaKtp', 'sewaBukti', 'fasFoto', 'fasBukti', 'kamarFoto'];
+            inputIds.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.dataset.base64 = '';
+                }
+            });
+        };
 
         const updateRoomStatuses = () => {
             const today = new Date();
@@ -871,7 +925,6 @@
         const renderSewa = () => { 
             const terisi = window.state.rooms.filter(r => r.status !== 'Kosong');
             
-            // PERBARUAN: Tombol Detail pada Status Sewa Aktif
             const htmlAktif = terisi.map(room => `
                 <tr class="hover:bg-slate-50">
                     <td class="px-5 py-3 font-bold text-slate-700">${room.name}</td>
@@ -885,7 +938,6 @@
             `).join('');
             document.getElementById('tableSewaAktif').innerHTML = htmlAktif || `<tr><td colspan="5" class="text-center py-4 text-slate-400">Semua kamar kosong</td></tr>`;
 
-            // PERBARUAN: Mengganti Riwayat Pembayaran menjadi Riwayat Penyewa Keluar
             const htmlRiwayatKeluar = window.state.tenantHistory.map(hist => `
                 <tr class="hover:bg-slate-50">
                     <td class="px-5 py-3 whitespace-nowrap text-sm">${formatTgl(hist.checkoutDate)}</td>
@@ -920,7 +972,6 @@
             document.getElementById('tableMasterKamar').innerHTML = htmlKamar || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Data master kosong</td></tr>`;
         };
 
-        // --- SISTEM HAPUS RIWAYAT ---
         window.confirmDeleteTransaction = (id) => {
             window.confirmAction("Hapus Riwayat Transaksi", "Data ini akan dihapus dari riwayat transaksi dan kalkulasi Dashboard akan menyesuaikan. Lanjutkan?", async () => {
                 try { await deleteDoc(doc(db, "transactions", id)); } catch(err) { alert("Gagal menghapus data."); }
@@ -933,7 +984,6 @@
             });
         };
 
-        // --- SISTEM MODAL DETAIL SEWA BARU ---
         window.openSewaDetail = (roomId) => {
             const room = window.state.rooms.find(r => r.id === roomId);
             if(!room) return;
@@ -1003,7 +1053,6 @@
                 });
 
                 window.closeModal('modalEditSewa');
-                // Auto update Modal Detail View
                 document.getElementById('detSewaTenantName').innerText = name;
                 document.getElementById('detSewaStartDate').innerText = formatTgl(start);
                 document.getElementById('detSewaEndDate').innerText = formatTgl(end);
@@ -1018,7 +1067,7 @@
                     phoneLink.classList.add('hidden');
                 }
 
-                window.openSewaDetail(roomId); // Buka kembali papan detail
+                window.openSewaDetail(roomId);
             } catch(err) {
                 console.error(err);
                 alert("Gagal mengedit data.");
@@ -1026,7 +1075,6 @@
             btn.innerText = "Simpan Edit"; btn.disabled = false;
         };
 
-        // --- SISTEM ASSET DETAIL, EDIT, STATUS ---
         window.openAssetDetail = (id) => {
             const asset = window.state.assets.find(a => a.id === id);
             if(!asset) return;
@@ -1210,6 +1258,14 @@
             }
         };
 
+        // FUNGSI BARU: Buka Modal Aset dengan Reset Preview
+        window.openTambahAset = () => {
+            document.getElementById('formAset').reset();
+            window.resetFormPreviews();
+            window.togglePilihKamar();
+            window.openModal('modalAset');
+        };
+
         window.openModalKamar = () => {
             document.getElementById('titleModalKamar').innerText = "Tambah Kamar";
             document.getElementById('formKamar').reset();
@@ -1217,6 +1273,7 @@
             window.tempFasilitas = [];
             document.getElementById('boxInputFasilitas').classList.add('hidden');
             document.getElementById('btnTriggerFasilitas').classList.remove('hidden');
+            window.resetFormPreviews();
             window.renderTempFasilitas();
             window.openModal('modalKamar');
         };
@@ -1236,8 +1293,8 @@
         window.pushFasilitas = async () => {
             const name = document.getElementById('fasNama').value;
             const condition = document.getElementById('fasKondisi').value;
-            const fileFoto = document.getElementById('fasFoto').files[0];
-            const fileBukti = document.getElementById('fasBukti').files[0];
+            const fileFoto = document.getElementById('fasFoto');
+            const fileBukti = document.getElementById('fasBukti');
 
             if(!name) return alert("Nama fasilitas wajib diisi!");
 
@@ -1245,17 +1302,21 @@
             btn.innerText = "Memproses..."; btn.disabled = true;
 
             try {
-                // Di sini foto dikompres jadi Base64
-                const base64Foto = fileFoto ? await compressImageToBase64(fileFoto) : dummyImg;
-                const base64Bukti = fileBukti ? await compressImageToBase64(fileBukti) : dummyImg;
+                // Ambil string hasil kompresi awal dari dataset
+                const base64Foto = fileFoto && fileFoto.dataset.base64 ? fileFoto.dataset.base64 : dummyImg;
+                const base64Bukti = fileBukti && fileBukti.dataset.base64 ? fileBukti.dataset.base64 : dummyImg;
 
                 window.tempFasilitas.push({
                     id: Date.now(), name, condition, itemImage: base64Foto, receiptImage: base64Bukti
                 });
 
                 document.getElementById('fasNama').value = '';
-                document.getElementById('fasFoto').value = '';
-                document.getElementById('fasBukti').value = '';
+                fileFoto.value = '';
+                fileBukti.value = '';
+                document.getElementById('prevFasFoto').classList.add('hidden');
+                document.getElementById('prevFasBukti').classList.add('hidden');
+                fileFoto.dataset.base64 = '';
+                fileBukti.dataset.base64 = '';
                 
                 window.toggleInputFasilitas();
                 window.renderTempFasilitas();
@@ -1297,6 +1358,9 @@
         window.editKamar = (id) => {
             const room = window.state.rooms.find(r => r.id === id);
             document.getElementById('titleModalKamar').innerText = "Edit Kamar";
+            document.getElementById('formKamar').reset();
+            window.resetFormPreviews();
+            
             document.getElementById('kamarId').value = room.id;
             document.getElementById('kamarNama').value = room.name;
             document.getElementById('kamarHarga').value = room.price;
@@ -1320,13 +1384,13 @@
             const id = document.getElementById('kamarId').value;
             const name = document.getElementById('kamarNama').value;
             const price = Number(document.getElementById('kamarHarga').value);
-            const file = document.getElementById('kamarFoto').files[0];
+            const fileInput = document.getElementById('kamarFoto');
             const facilities = [...window.tempFasilitas]; 
             
             try {
                 let base64Cover = id ? window.state.rooms.find(r=>r.id===id).cover : dummyImg;
-                if(file) {
-                    base64Cover = await compressImageToBase64(file);
+                if(fileInput.files[0] && fileInput.dataset.base64) {
+                    base64Cover = fileInput.dataset.base64;
                 }
 
                 if(id) {
@@ -1358,7 +1422,7 @@
         window.saveAset = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanAset');
-            btn.innerText = "Menyimpan Data..."; btn.disabled = true;
+            btn.innerText = "Menyimpan Instan..."; btn.disabled = true;
 
             try {
                 const date = document.getElementById('asetTanggal').value;
@@ -1368,14 +1432,12 @@
                 const type = document.getElementById('asetKeperluan').value;
                 const roomId = type === 'Kamar' ? document.getElementById('asetKamarId').value : null;
                 
-                const fileFoto = document.getElementById('asetFoto').files[0];
-                const fileNota = document.getElementById('asetNota').files[0];
+                const fileFoto = document.getElementById('asetFoto');
+                const fileNota = document.getElementById('asetNota');
                 
-                // SISTEM Teks Base64 PARALEL: Kompresi berjalan bersamaan
-                const [base64Foto, base64Nota] = await Promise.all([
-                    fileFoto ? compressImageToBase64(fileFoto) : dummyImg,
-                    fileNota ? compressImageToBase64(fileNota) : dummyImg
-                ]);
+                // Mengambil hasil kompresi yang sudah terjadi di latar belakang saat pratinjau
+                const base64Foto = fileFoto.dataset.base64 || dummyImg;
+                const base64Nota = fileNota.dataset.base64 || dummyImg;
 
                 const assetRef = await addDoc(collection(db, "assets"), { 
                     name, price, type, roomId, date, condition, image: base64Foto, receiptImage: base64Nota, status: 'Normal', history: [], timestamp: Date.now() 
@@ -1441,11 +1503,12 @@
 
         window.openInputSewa = () => { 
             document.getElementById('titleModalSewa').innerText = "Input Sewa Baru";
+            document.getElementById('formSewa').reset();
+            window.resetFormPreviews();
+
             document.getElementById('sewaMode').value = "baru";
             document.getElementById('sewaPenyewa').disabled = false;
-            document.getElementById('sewaPenyewa').value = "";
             document.getElementById('sewaPhone').disabled = false;
-            document.getElementById('sewaPhone').value = "";
             
             const tglMulaiEl = document.getElementById('sewaTglMulai');
             tglMulaiEl.value = new Date().toISOString().split('T')[0];
@@ -1464,6 +1527,9 @@
         window.openPerpanjangSewa = (roomId) => { 
             const room = window.state.rooms.find(r => r.id === roomId);
             document.getElementById('titleModalSewa').innerText = "Perpanjang Sewa";
+            document.getElementById('formSewa').reset();
+            window.resetFormPreviews();
+
             document.getElementById('sewaMode').value = "perpanjang";
             document.getElementById('sewaKamarId').innerHTML = `<option value="${room.id}">${room.name} - ${formatRp(room.price)}/bln</option>`;
             document.getElementById('sewaPenyewa').value = room.tenantName;
@@ -1494,7 +1560,7 @@
         window.saveSewa = async (e) => { 
             e.preventDefault();
             const btn = document.getElementById('btnSimpanSewa');
-            btn.innerText = "Memproses Dokumen..."; btn.disabled = true;
+            btn.innerText = "Menyimpan Instan..."; btn.disabled = true;
 
             try {
                 const mode = document.getElementById('sewaMode').value;
@@ -1521,17 +1587,15 @@
                 const room = window.state.rooms.find(r => String(r.id) === String(roomId));
                 if(!room) throw new Error("Data kamar tidak ditemukan.");
 
-                const fileKtp = document.getElementById('sewaKtp').files[0];
-                const fileBukti = document.getElementById('sewaBukti').files[0];
+                const fileKtp = document.getElementById('sewaKtp');
+                const fileBukti = document.getElementById('sewaBukti');
                 
-                // SISTEM Teks Base64 PARALEL: Kompresi berjalan bersamaan
-                const [base64Ktp, base64Bukti] = await Promise.all([
-                    (async () => {
-                        if (mode === 'perpanjang' && !fileKtp && room.tenantKtp) return room.tenantKtp;
-                        return fileKtp ? compressImageToBase64(fileKtp) : dummyImg;
-                    })(),
-                    fileBukti ? compressImageToBase64(fileBukti) : dummyImg
-                ]);
+                // Ambil string hasil pratinjau yang sudah siap
+                let base64Ktp = fileKtp.dataset.base64 || dummyImg;
+                if (mode === 'perpanjang' && !fileKtp.files[0] && room.tenantKtp) {
+                    base64Ktp = room.tenantKtp;
+                }
+                const base64Bukti = fileBukti.dataset.base64 || dummyImg;
 
                 const amount = room.price * durasi;
 
