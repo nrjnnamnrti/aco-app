@@ -10,7 +10,6 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <script>
@@ -47,46 +46,15 @@
 </head>
 <body class="text-slate-800 font-sans antialiased text-base">
 
-    <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center">
-            <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="building-2" class="w-8 h-8"></i>
-            </div>
-            <div class="flex items-center justify-center gap-2 mb-1">
-                <h1 class="text-2xl font-bold text-slate-800">ACO</h1>
-                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">v2.14</span>
-            </div>
-            <p class="text-slate-500 text-sm mb-6">Silakan login untuk mengelola properti</p>
-            
-            <form id="loginForm" class="space-y-4" onsubmit="handleLogin(event)">
-                <div>
-                    <input type="text" id="username" placeholder="Username" required autocomplete="off"
-                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
-                </div>
-                <div>
-                    <input type="password" id="password" placeholder="Password" required
-                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
-                </div>
-                <div id="loginError" class="text-red-500 text-xs hidden text-left bg-red-50 p-2 rounded border border-red-100">Username atau password salah!</div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold p-3 rounded-xl shadow-md transition active:scale-95">
-                    Masuk
-                </button>
-            </form>
-            <p class="mt-6 text-xs text-slate-500">Dibuat oleh <a href="https://masjidashqaf.com" target="_blank" rel="noopener noreferrer" class="text-indigo-600 font-medium hover:underline">masjidashqaf.com</a></p>
-        </div>
-    </div>
-
-    <div id="appScreen" class="hidden min-h-screen pb-20 md:pb-6">
+    <!-- Aplikasi Langsung Ditampilkan -->
+    <div id="appScreen" class="min-h-screen pb-20 md:pb-6">
         
         <header class="bg-indigo-600 text-white sticky top-0 z-30 shadow-md">
             <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <i data-lucide="building-2" class="w-6 h-6"></i>
-                    <h1 class="text-xl font-bold">ACO</h1>
+                    <h1 class="text-xl font-bold">ACO Dashboard</h1>
                 </div>
-                <button onclick="logout()" title="Keluar Aplikasi" class="p-2 bg-indigo-700 rounded-lg hover:bg-indigo-800 transition">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                </button>
             </div>
             
             <nav class="max-w-5xl mx-auto px-4 flex justify-center gap-6 border-t border-indigo-500 pb-3 pt-3 no-scrollbar">
@@ -100,19 +68,28 @@
         <main class="max-w-5xl mx-auto p-4 md:p-6">
             
             <div id="view-dashboard" class="tab-content active space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Ubah grid dari 3 kolom ke 4 kolom (untuk mobile jadi 2 kolom) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
                         <div class="bg-green-100 text-green-600 p-3 rounded-xl"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
                         <div>
-                            <p class="text-sm text-slate-500">Pemasukan (Sewa)</p>
+                            <p class="text-sm text-slate-500">Pemasukan</p>
                             <h3 class="text-xl font-bold text-slate-800" id="dashPemasukan">Rp 0</h3>
                         </div>
                     </div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
                         <div class="bg-red-100 text-red-600 p-3 rounded-xl"><i data-lucide="trending-down" class="w-6 h-6"></i></div>
                         <div>
-                            <p class="text-sm text-slate-500">Pengeluaran (Aset)</p>
+                            <p class="text-sm text-slate-500">Pengeluaran</p>
                             <h3 class="text-xl font-bold text-slate-800" id="dashPengeluaran">Rp 0</h3>
+                        </div>
+                    </div>
+                    <!-- Menu Sisa Kas Baru -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="bg-blue-100 text-blue-600 p-3 rounded-xl"><i data-lucide="wallet" class="w-6 h-6"></i></div>
+                        <div>
+                            <p class="text-sm text-slate-500">Sisa Kas</p>
+                            <h3 class="text-xl font-bold text-slate-800" id="dashSisaKas">Rp 0</h3>
                         </div>
                     </div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
@@ -370,6 +347,7 @@
         </div>
     </div>
 
+    <!-- Modal Edit Data Aset -->
     <div id="modalEditAsset" class="fixed inset-0 bg-slate-900/60 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
             <h2 class="text-lg font-bold text-slate-800 mb-4">Edit Data Aset</h2>
@@ -597,7 +575,8 @@
         </div>
     </div>
 
-    <div id="modalConfirm" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+    <!-- Modal Konfirmasi -->
+    <div id="modalConfirm" class="fixed inset-0 bg-slate-900/60 z-[80] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i data-lucide="alert-triangle" class="w-8 h-8"></i>
@@ -608,6 +587,18 @@
                 <button onclick="closeModal('modalConfirm')" class="w-1/2 p-2.5 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200">Batal</button>
                 <button id="btnConfirmAction" class="w-1/2 p-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">Ya, Lanjutkan</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal Peringatan/Informasi Umum -->
+    <div id="modalAlert" class="fixed inset-0 bg-slate-900/60 z-[90] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="info" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-lg font-bold text-slate-800 mb-2">Informasi</h2>
+            <p class="text-slate-500 text-sm mb-6" id="alertText">Pesan di sini</p>
+            <button onclick="closeModal('modalAlert')" class="w-full p-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700">Tutup</button>
         </div>
     </div>
 
@@ -637,6 +628,7 @@
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // Konfigurasi Database User Original dipertahankan
         const firebaseConfig = {
             apiKey: "AIzaSyBNWxxQIhfMforEazNKzsqOAXPb8FObO1I",
             authDomain: "aco-app-11a2d.firebaseapp.com",
@@ -711,7 +703,36 @@
             img.src = imgUrl;
         });
 
-        // FUNGSI BARU: Pratinjau & Kompresi Instan saat foto dipilih
+        // FUNGSI UMUM MODAL & ALERT REPLACEMENT
+        window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+        
+        window.showAlert = (msg) => {
+            document.getElementById('alertText').innerText = msg;
+            window.openModal('modalAlert');
+        };
+
+        window.openLightbox = (imgSrc) => {
+            if(!imgSrc || imgSrc === 'undefined' || imgSrc === dummyImg) return window.showAlert("Foto tidak tersedia.");
+            document.getElementById('lightboxImage').src = imgSrc;
+            window.openModal('modalLightbox');
+        };
+
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.nav-tab').forEach(el => {
+                el.classList.remove('active', 'bg-indigo-700', 'text-white');
+                el.classList.add('text-indigo-100', 'hover:bg-indigo-700');
+            });
+            const activeTabBtn = document.getElementById(`tab-${tabId}`);
+            activeTabBtn.classList.remove('text-indigo-100', 'hover:bg-indigo-700');
+            activeTabBtn.classList.add('active', 'bg-indigo-700', 'text-white');
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${tabId}`).classList.add('active');
+            window.renderAll();
+        };
+
+        // KOMPRESI FOTO INSTAN
         window.previewImage = async (inputId, previewId) => {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
@@ -724,22 +745,21 @@
             }
 
             try {
-                input.disabled = true; // Kunci tombol sementara
+                input.disabled = true;
                 const base64 = await compressImageToBase64(file);
-                input.dataset.base64 = base64; // Simpan teks panjang di latar belakang
+                input.dataset.base64 = base64;
                 preview.src = base64;
-                preview.classList.remove('hidden'); // Munculkan gambar kecil
+                preview.classList.remove('hidden');
             } catch (err) {
-                alert("Gagal memproses gambar: " + err.message);
+                window.showAlert("Gagal memproses gambar: " + err.message);
                 input.value = '';
                 preview.classList.add('hidden');
                 input.dataset.base64 = '';
             } finally {
-                input.disabled = false; // Buka kunci tombol
+                input.disabled = false;
             }
         };
 
-        // FUNGSI BARU: Mereset semua gambar kecil saat menutup/membuka formulir
         window.resetFormPreviews = () => {
             const prevIds = ['prevAsetFoto', 'prevAsetNota', 'prevSewaKtp', 'prevSewaBukti', 'prevFasFoto', 'prevFasBukti', 'prevKamarFoto'];
             prevIds.forEach(id => {
@@ -752,9 +772,7 @@
             const inputIds = ['asetFoto', 'asetNota', 'sewaKtp', 'sewaBukti', 'fasFoto', 'fasBukti', 'kamarFoto'];
             inputIds.forEach(id => {
                 const el = document.getElementById(id);
-                if(el) {
-                    el.dataset.base64 = '';
-                }
+                if(el) el.dataset.base64 = '';
             });
         };
 
@@ -772,61 +790,6 @@
             });
         };
 
-        window.handleLogin = async (e) => {
-            e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            const btn = document.querySelector('#loginForm button');
-
-            if(u === 'admin' && p === '24434') {
-                btn.innerText = "Menghubungkan...";
-                btn.disabled = true;
-                try {
-                    await signInAnonymously(auth);
-                    document.getElementById('loginScreen').classList.add('hidden');
-                    document.getElementById('appScreen').classList.remove('hidden');
-                    window.initApp();
-                } catch (error) {
-                    document.getElementById('loginError').innerText = "Gagal. Pesan Error Firebase: " + error.message;
-                    document.getElementById('loginError').classList.remove('hidden');
-                }
-                btn.innerText = "Masuk";
-                btn.disabled = false;
-            } else {
-                document.getElementById('loginError').innerText = "Username atau password salah!";
-                document.getElementById('loginError').classList.remove('hidden');
-            }
-        };
-
-        window.logout = () => {
-            document.getElementById('appScreen').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-        };
-
-        window.switchTab = (tabId) => {
-            document.querySelectorAll('.nav-tab').forEach(el => {
-                el.classList.remove('active', 'bg-indigo-700', 'text-white');
-                el.classList.add('text-indigo-100', 'hover:bg-indigo-700');
-            });
-            const activeTabBtn = document.getElementById(`tab-${tabId}`);
-            activeTabBtn.classList.remove('text-indigo-100', 'hover:bg-indigo-700');
-            activeTabBtn.classList.add('active', 'bg-indigo-700', 'text-white');
-
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${tabId}`).classList.add('active');
-            window.renderAll();
-        };
-
-        window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-        window.openLightbox = (imgSrc) => {
-            if(!imgSrc || imgSrc === 'undefined' || imgSrc === dummyImg) return alert("Foto tidak tersedia.");
-            document.getElementById('lightboxImage').src = imgSrc;
-            window.openModal('modalLightbox');
-        };
-
         window.renderAll = () => {
             updateRoomStatuses();
             renderDashboard();
@@ -836,13 +799,16 @@
             lucide.createIcons();
         };
 
+        // DASHBOARD DENGAN MENU SISA KAS
         const renderDashboard = () => {
             const sumMasuk = window.state.transactions.filter(t => t.type === 'Pemasukan').reduce((a, b) => a + Number(b.amount), 0);
             const sumKeluar = window.state.transactions.filter(t => t.type === 'Pengeluaran').reduce((a, b) => a + Number(b.amount), 0);
+            const sisaKas = sumMasuk - sumKeluar;
             const sumTerisi = window.state.rooms.filter(r => r.status !== 'Kosong').length;
             
             document.getElementById('dashPemasukan').innerText = formatRp(sumMasuk);
             document.getElementById('dashPengeluaran').innerText = formatRp(sumKeluar);
+            document.getElementById('dashSisaKas').innerText = formatRp(sisaKas);
             document.getElementById('dashKamarTerisi').innerText = `${sumTerisi} dari ${window.state.rooms.length}`;
 
             const htmlTrx = window.state.transactions.slice(0, 5).map(trx => `
@@ -972,15 +938,34 @@
             document.getElementById('tableMasterKamar').innerHTML = htmlKamar || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Data master kosong</td></tr>`;
         };
 
+        // --- SISTEM KONFIRMASI TINDAKAN ---
+        let currentConfirmAction = null;
+        window.confirmAction = (title, text, callback) => {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmText').innerText = text;
+            currentConfirmAction = callback;
+            window.openModal('modalConfirm');
+        };
+        
+        document.getElementById('btnConfirmAction').addEventListener('click', async () => {
+            if(currentConfirmAction) {
+                const btn = document.getElementById('btnConfirmAction');
+                btn.innerText = "Memproses...";
+                await currentConfirmAction();
+                btn.innerText = "Ya, Lanjutkan";
+            }
+            window.closeModal('modalConfirm');
+        });
+
         window.confirmDeleteTransaction = (id) => {
             window.confirmAction("Hapus Riwayat Transaksi", "Data ini akan dihapus dari riwayat transaksi dan kalkulasi Dashboard akan menyesuaikan. Lanjutkan?", async () => {
-                try { await deleteDoc(doc(db, "transactions", id)); } catch(err) { alert("Gagal menghapus data."); }
+                try { await deleteDoc(doc(db, "transactions", id)); } catch(err) { window.showAlert("Gagal menghapus data."); }
             });
         };
 
         window.confirmDeleteHistory = (id) => {
             window.confirmAction("Hapus Riwayat Penyewa", "Data historis penyewa ini akan dihapus permanen. Lanjutkan?", async () => {
-                try { await deleteDoc(doc(db, "tenant_history", id)); } catch(err) { alert("Gagal menghapus riwayat."); }
+                try { await deleteDoc(doc(db, "tenant_history", id)); } catch(err) { window.showAlert("Gagal menghapus riwayat."); }
             });
         };
 
@@ -1070,7 +1055,7 @@
                 window.openSewaDetail(roomId);
             } catch(err) {
                 console.error(err);
-                alert("Gagal mengedit data.");
+                window.showAlert("Gagal mengedit data.");
             }
             btn.innerText = "Simpan Edit"; btn.disabled = false;
         };
@@ -1179,7 +1164,7 @@
                 window.closeModal('modalEditAsset');
             } catch(err) { 
                 console.error(err);
-                alert("Gagal mengedit data: " + (err.message || "")); 
+                window.showAlert("Gagal mengedit data: " + (err.message || "")); 
             }
             btn.innerText = "Simpan Edit"; btn.disabled = false;
         };
@@ -1217,14 +1202,13 @@
                 window.closeModal('modalStatusAsset');
             } catch(err) { 
                 console.error(err);
-                alert("Gagal update status: " + (err.message || "")); 
+                window.showAlert("Gagal update status: " + (err.message || "")); 
             }
             btn.innerText = "Simpan Status"; btn.disabled = false;
         };
 
         window.triggerDeleteAsset = async () => {
-            const userInput = prompt('Ketik "maaf saya salah input" untuk menghapus permanen data aset ini dan transaksinya:');
-            if (userInput === "maaf saya salah input") {
+            window.confirmAction("Hapus Permanen Aset", "Apakah Anda yakin ingin menghapus permanen data aset ini beserta rekam jejak transaksinya?", async () => {
                 try {
                     const id = window.activeAssetId;
                     const asset = window.state.assets.find(a => a.id === id);
@@ -1248,17 +1232,14 @@
 
                     await deleteDoc(doc(db, "assets", id));
                     window.closeModal('modalAssetDetail');
-                    alert("Data berhasil dihapus!");
+                    window.showAlert("Data aset berhasil dihapus!");
                 } catch (err) { 
                     console.error(err);
-                    alert("Gagal menghapus data: " + (err.message || "")); 
+                    window.showAlert("Gagal menghapus data: " + (err.message || "")); 
                 }
-            } else {
-                if(userInput !== null) alert("Teks tidak sesuai. Penghapusan dibatalkan.");
-            }
+            });
         };
 
-        // FUNGSI BARU: Buka Modal Aset dengan Reset Preview
         window.openTambahAset = () => {
             document.getElementById('formAset').reset();
             window.resetFormPreviews();
@@ -1296,13 +1277,12 @@
             const fileFoto = document.getElementById('fasFoto');
             const fileBukti = document.getElementById('fasBukti');
 
-            if(!name) return alert("Nama fasilitas wajib diisi!");
+            if(!name) return window.showAlert("Nama fasilitas wajib diisi!");
 
             const btn = document.getElementById('btnSimpanFas');
             btn.innerText = "Memproses..."; btn.disabled = true;
 
             try {
-                // Ambil string hasil kompresi awal dari dataset
                 const base64Foto = fileFoto && fileFoto.dataset.base64 ? fileFoto.dataset.base64 : dummyImg;
                 const base64Bukti = fileBukti && fileBukti.dataset.base64 ? fileBukti.dataset.base64 : dummyImg;
 
@@ -1322,7 +1302,7 @@
                 window.renderTempFasilitas();
             } catch (err) { 
                 console.error(err);
-                alert("Gagal memproses gambar fasilitas: " + (err.message || "")); 
+                window.showAlert("Gagal memproses gambar fasilitas: " + (err.message || "")); 
             }
             btn.innerText = "Tambahkan"; btn.disabled = false;
         };
@@ -1403,7 +1383,7 @@
                 window.closeModal('modalKamar');
             } catch (err) { 
                 console.error(err);
-                alert("Gagal menyimpan data kamar: " + (err.message || "")); 
+                window.showAlert("Gagal menyimpan data kamar: " + (err.message || "")); 
             }
             btn.innerText = "Simpan Kamar"; btn.disabled = false;
         };
@@ -1435,7 +1415,6 @@
                 const fileFoto = document.getElementById('asetFoto');
                 const fileNota = document.getElementById('asetNota');
                 
-                // Mengambil hasil kompresi yang sudah terjadi di latar belakang saat pratinjau
                 const base64Foto = fileFoto.dataset.base64 || dummyImg;
                 const base64Nota = fileNota.dataset.base64 || dummyImg;
 
@@ -1459,7 +1438,7 @@
                 window.togglePilihKamar();
             } catch (err) { 
                 console.error(err);
-                alert("Gagal simpan aset: " + (err.message || "")); 
+                window.showAlert("Gagal simpan aset: " + (err.message || "")); 
             }
             btn.innerText = "Simpan Aset"; btn.disabled = false;
         };
@@ -1590,7 +1569,6 @@
                 const fileKtp = document.getElementById('sewaKtp');
                 const fileBukti = document.getElementById('sewaBukti');
                 
-                // Ambil string hasil pratinjau yang sudah siap
                 let base64Ktp = fileKtp.dataset.base64 || dummyImg;
                 if (mode === 'perpanjang' && !fileKtp.files[0] && room.tenantKtp) {
                     base64Ktp = room.tenantKtp;
@@ -1619,7 +1597,7 @@
                 window.closeModal('modalSewa');
             } catch (err) { 
                 console.error(err);
-                alert("Gagal memproses data sewa: " + (err.message || "")); 
+                window.showAlert("Gagal memproses data sewa: " + (err.message || "")); 
             }
             btn.innerText = "Simpan Sewa"; btn.disabled = false;
         };
@@ -1648,24 +1626,6 @@
             });
         };
 
-        let currentConfirmAction = null;
-        window.confirmAction = (title, text, callback) => {
-            document.getElementById('confirmTitle').innerText = title;
-            document.getElementById('confirmText').innerText = text;
-            currentConfirmAction = callback;
-            window.openModal('modalConfirm');
-        };
-        
-        document.getElementById('btnConfirmAction').addEventListener('click', async () => {
-            if(currentConfirmAction) {
-                const btn = document.getElementById('btnConfirmAction');
-                btn.innerText = "Memproses...";
-                await currentConfirmAction();
-                btn.innerText = "Ya, Lanjutkan";
-            }
-            window.closeModal('modalConfirm');
-        });
-
         window.confirmDelete = (type, id) => {
             window.confirmAction("Hapus Data Master", "Aksi ini tidak bisa dikembalikan. Lanjut?", async () => {
                 if(type === 'kamar') await deleteDoc(doc(db, "rooms", id));
@@ -1691,7 +1651,6 @@
                 window.renderAll();
             }, (err) => console.error("Transaction listener error", err));
 
-            // Listener untuk data riwayat penyewa keluar
             onSnapshot(collection(db, "tenant_history"), (snapshot) => {
                 window.state.tenantHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 window.state.tenantHistory.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
@@ -1699,6 +1658,17 @@
             }, (err) => console.error("Tenant history listener error", err));
         };
         
+        // AUTO LOGIN/STARTUP (menggantikan sistem Login)
+        (async () => {
+            try {
+                await signInAnonymously(auth);
+                window.initApp();
+            } catch (error) {
+                console.error("Firebase Auth Error:", error);
+                window.showAlert("Gagal terhubung ke database. Cek koneksi Anda.");
+            }
+        })();
+
         // --- PWA INSTALL PROMPT LOGIC ---
         let deferredPrompt;
         const installBanner = document.getElementById('pwaInstallBanner');
